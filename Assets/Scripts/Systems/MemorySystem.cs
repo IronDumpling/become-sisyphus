@@ -6,7 +6,7 @@ using BecomeSisyphus.Core.Data;
 
 namespace BecomeSisyphus.Systems
 {
-    public class MemorySystem : MonoBehaviour, ISystem
+    public class MemorySystem : ISystem
     {
         private Dictionary<string, Memory> discoveredMemories = new Dictionary<string, Memory>();
         private SisyphusManager sisyphusManager;

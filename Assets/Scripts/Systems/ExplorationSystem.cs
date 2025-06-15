@@ -6,7 +6,7 @@ using BecomeSisyphus.Core.Data;
 
 namespace BecomeSisyphus.Systems
 {
-    public class ExplorationSystem : MonoBehaviour, ISystem
+    public class ExplorationSystem : ISystem
     {
         private SisyphusManager sisyphusManager;
         private Vector3 currentPosition;

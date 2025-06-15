@@ -1,4 +1,3 @@
-using UnityEngine;
 using System;
 using System.Collections.Generic;
 using BecomeSisyphus.Core;
@@ -6,10 +5,10 @@ using BecomeSisyphus.Core.Data;
 
 namespace BecomeSisyphus.Systems
 {
-    public class ConfusionSystem : MonoBehaviour, ISystem
+    public class ConfusionSystem : ISystem
     {
-        [SerializeField] private float confusionGenerationInterval = 30f;
-        [SerializeField] private float temporaryConfusionDuration = 60f;
+        private float confusionGenerationInterval = 30f;
+        private float temporaryConfusionDuration = 60f;
 
         private List<Confusion> activeConfusions = new List<Confusion>();
         private Dictionary<string, Confusion> confusionTemplates = new Dictionary<string, Confusion>();
@@ -21,11 +20,16 @@ namespace BecomeSisyphus.Systems
         public event Action<Confusion> OnConfusionSolved;
         public event Action<Confusion> OnConfusionExpired;
 
+        public ConfusionSystem(float confusionGenerationInterval, float temporaryConfusionDuration)
+        {
+            this.confusionGenerationInterval = confusionGenerationInterval;
+            this.temporaryConfusionDuration = temporaryConfusionDuration;
+        }
+
         public void Initialize()
         {
-            mindSystem = GameManager.Instance.GetSystem<SisyphusMindSystem>();
-            vesselSystem = GameManager.Instance.GetSystem<ThoughtVesselSystem>();
-            lastConfusionGenerationTime = Time.time;
+            lastConfusionGenerationTime = 0f;
+            // mindSystem and vesselSystem should be set externally or via setters
             LoadConfusionTemplates();
         }
 
@@ -34,34 +38,44 @@ namespace BecomeSisyphus.Systems
             // TODO: 从配置文件或ScriptableObject加载困惑模板
         }
 
-        public void Update()
+        public void Update() { }
+
+        public void Update(float deltaTime, float time)
         {
-            if (Time.time - lastConfusionGenerationTime >= confusionGenerationInterval)
+            if (time - lastConfusionGenerationTime >= confusionGenerationInterval)
             {
                 TryGenerateConfusion();
-                lastConfusionGenerationTime = Time.time;
+                lastConfusionGenerationTime = time;
             }
 
-            UpdateTemporaryConfusions();
+            UpdateTemporaryConfusions(time);
         }
 
         private void TryGenerateConfusion()
         {
             // TODO: 实现困惑生成逻辑
-            // 基于游戏进度、当前状态等条件生成新的困惑
         }
 
-        private void UpdateTemporaryConfusions()
+        private void UpdateTemporaryConfusions(float time)
         {
             for (int i = activeConfusions.Count - 1; i >= 0; i--)
             {
                 var confusion = activeConfusions[i];
                 if (confusion.type == ConfusionType.Temporary && 
-                    Time.time - confusion.timeLimit >= temporaryConfusionDuration)
+                    time - confusion.timeLimit >= temporaryConfusionDuration)
                 {
                     ExpireConfusion(confusion);
                 }
             }
+        }
+
+        public void SetMindSystem(SisyphusMindSystem system)
+        {
+            mindSystem = system;
+        }
+        public void SetVesselSystem(ThoughtVesselSystem system)
+        {
+            vesselSystem = system;
         }
 
         public void GenerateConfusion(Confusion confusion)
@@ -77,9 +91,10 @@ namespace BecomeSisyphus.Systems
                 confusion.Solve();
                 activeConfusions.Remove(confusion);
                 OnConfusionSolved?.Invoke(confusion);
-                
-                // 奖励精神力
-                mindSystem.ConsumeMentalStrength(-50f); // 恢复50点精神力
+                if (mindSystem != null)
+                {
+                    mindSystem.ConsumeMentalStrength(-50f, 0f);
+                }
             }
         }
 

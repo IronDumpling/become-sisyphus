@@ -4,7 +4,7 @@ using BecomeSisyphus.Core;
 
 namespace BecomeSisyphus.Systems
 {
-    public class TimeSystem : MonoBehaviour, ISystem
+    public class TimeSystem : ISystem
     {
         [SerializeField] private float timeScale = 1f;
         [SerializeField] private float dayLength = 24f; // 游戏内一天的长度（分钟）
@@ -21,6 +21,12 @@ namespace BecomeSisyphus.Systems
         public float GameTime => gameTime;
         public int CurrentDay => currentDay;
         public Season CurrentSeason => currentSeason;
+
+        public TimeSystem(float timeScale, float dayLength)
+        {
+            this.timeScale = timeScale;
+            this.dayLength = dayLength;
+        }
 
         public void Initialize()
         {

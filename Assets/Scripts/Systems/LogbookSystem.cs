@@ -6,7 +6,7 @@ using BecomeSisyphus.Core.Data;
 
 namespace BecomeSisyphus.Systems
 {
-    public class LogbookSystem : MonoBehaviour, ISystem
+    public class LogbookSystem : ISystem
     {
         private List<LogEntry> logEntries = new List<LogEntry>();
         private Dictionary<string, Signifier> signifierRecords = new Dictionary<string, Signifier>();

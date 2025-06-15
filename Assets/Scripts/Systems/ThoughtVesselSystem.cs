@@ -1,4 +1,3 @@
-using UnityEngine;
 using System;
 using System.Collections.Generic;
 using BecomeSisyphus.Core;
@@ -6,12 +5,12 @@ using BecomeSisyphus.Core.Data;
 
 namespace BecomeSisyphus.Systems
 {
-    public class ThoughtVesselSystem : MonoBehaviour, ISystem
+    public class ThoughtVesselSystem : ISystem
     {
-        [SerializeField] private int initialRows = 3;
-        [SerializeField] private int initialColumns = 3;
-        [SerializeField] private float loadRatioThreshold = 0.5f;
-        [SerializeField] private float mentalStrengthConsumptionRate = 2f;
+        private int initialRows = 3;
+        private int initialColumns = 3;
+        private float loadRatioThreshold = 0.5f;
+        private float mentalStrengthConsumptionRate = 2f;
 
         private VesselCargo[,] grid;
         private SisyphusMindSystem mindSystem;
@@ -26,23 +25,38 @@ namespace BecomeSisyphus.Systems
 
         public float LoadRatio => (float)GetOccupiedCells() / (rows * columns);
 
+        public ThoughtVesselSystem(int initialRows, int initialColumns, float loadRatioThreshold, float mentalStrengthConsumptionRate)
+        {
+            this.initialRows = initialRows;
+            this.initialColumns = initialColumns;
+            this.loadRatioThreshold = loadRatioThreshold;
+            this.mentalStrengthConsumptionRate = mentalStrengthConsumptionRate;
+        }
+
         public void Initialize()
         {
-            mindSystem = GameManager.Instance.GetSystem<SisyphusMindSystem>();
+            // mindSystem should be set externally or via a setter
             rows = initialRows;
             columns = initialColumns;
             grid = new VesselCargo[rows, columns];
         }
 
-        public void Update()
+        public void Update() { }
+
+        public void Update(float deltaTime)
         {
-            if (LoadRatio >= loadRatioThreshold)
+            if (mindSystem != null && LoadRatio >= loadRatioThreshold)
             {
-                mindSystem.ConsumeMentalStrength(mentalStrengthConsumptionRate * Time.deltaTime);
+                mindSystem.ConsumeMentalStrength(mentalStrengthConsumptionRate * deltaTime, 0f);
             }
         }
 
-        public bool AddCargo(VesselCargo cargo, Vector2Int position)
+        public void SetMindSystem(SisyphusMindSystem system)
+        {
+            mindSystem = system;
+        }
+
+        public bool AddCargo(VesselCargo cargo, UnityEngine.Vector2Int position)
         {
             if (!IsValidPosition(position) || !CanPlaceCargo(cargo, position))
             {
@@ -55,7 +69,7 @@ namespace BecomeSisyphus.Systems
             return true;
         }
 
-        public bool MoveCargo(VesselCargo cargo, Vector2Int newPosition)
+        public bool MoveCargo(VesselCargo cargo, UnityEngine.Vector2Int newPosition)
         {
             if (!IsValidPosition(newPosition) || !CanPlaceCargo(cargo, newPosition))
             {
@@ -77,7 +91,7 @@ namespace BecomeSisyphus.Systems
 
         public bool RemoveCargo(VesselCargo cargo)
         {
-            Vector2Int pos = cargo.position;
+            UnityEngine.Vector2Int pos = cargo.position;
             if (IsValidPosition(pos) && grid[pos.x, pos.y] == cargo)
             {
                 grid[pos.x, pos.y] = null;
@@ -88,19 +102,19 @@ namespace BecomeSisyphus.Systems
             return false;
         }
 
-        private void PlaceCargo(VesselCargo cargo, Vector2Int position)
+        private void PlaceCargo(VesselCargo cargo, UnityEngine.Vector2Int position)
         {
             grid[position.x, position.y] = cargo;
             cargo.SetPosition(position);
         }
 
-        private bool CanPlaceCargo(VesselCargo cargo, Vector2Int position)
+        private bool CanPlaceCargo(VesselCargo cargo, UnityEngine.Vector2Int position)
         {
             // TODO: 实现检查是否可以放置货物的逻辑
             return true;
         }
 
-        private bool IsValidPosition(Vector2Int position)
+        private bool IsValidPosition(UnityEngine.Vector2Int position)
         {
             return position.x >= 0 && position.x < rows && position.y >= 0 && position.y < columns;
         }

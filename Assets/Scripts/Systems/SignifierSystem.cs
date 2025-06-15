@@ -6,7 +6,7 @@ using BecomeSisyphus.Core.Data;
 
 namespace BecomeSisyphus.Systems
 {
-    public class SignifierSystem : MonoBehaviour, ISystem
+    public class SignifierSystem : ISystem
     {
         private Dictionary<string, Signifier> discoveredSignifiers = new Dictionary<string, Signifier>();
         private SisyphusMindSystem mindSystem;

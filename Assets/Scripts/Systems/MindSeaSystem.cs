@@ -6,11 +6,11 @@ using BecomeSisyphus.Core.Data;
 
 namespace BecomeSisyphus.Systems
 {
-    public class MindSeaSystem : MonoBehaviour, ISystem
+    public class MindSeaSystem : ISystem
     {
-        [SerializeField] private float baseMentalStrengthConsumption = 1f;
-        [SerializeField] private float stormMentalStrengthConsumption = 3f;
-        [SerializeField] private float vortexMentalStrengthConsumption = 2f;
+        private float baseMentalStrengthConsumption = 1f;
+        private float stormMentalStrengthConsumption = 3f;
+        private float vortexMentalStrengthConsumption = 2f;
 
         private SisyphusMindSystem mindSystem;
         private Vector3 currentPosition;
@@ -25,17 +25,15 @@ namespace BecomeSisyphus.Systems
 
         public void Initialize()
         {
-            mindSystem = GameManager.Instance.GetSystem<SisyphusMindSystem>();
             currentPosition = Vector3.zero;
         }
 
-        public void Update()
+        public void Update() { }
+
+        public void Update(float deltaTime)
         {
-            if (GameManager.Instance.CurrentState == GameState.ExploringMind)
-            {
-                HandleExplorationInput();
-                UpdateMentalStrengthConsumption();
-            }
+            // This should be called from the MonoBehaviour wrapper
+            UpdateMentalStrengthConsumption(deltaTime);
         }
 
         private void HandleExplorationInput()
@@ -45,11 +43,9 @@ namespace BecomeSisyphus.Systems
             // 检查是否发现新的区域、标记或能指
         }
 
-        private void UpdateMentalStrengthConsumption()
+        private void UpdateMentalStrengthConsumption(float deltaTime)
         {
             float consumption = baseMentalStrengthConsumption;
-            
-            // 检查当前位置是否在危险区域
             if (IsInStorm())
             {
                 consumption += stormMentalStrengthConsumption;
@@ -58,8 +54,13 @@ namespace BecomeSisyphus.Systems
             {
                 consumption += vortexMentalStrengthConsumption;
             }
+            if (mindSystem != null)
+                mindSystem.ConsumeMentalStrength(consumption * deltaTime, 0f);
+        }
 
-            mindSystem.ConsumeMentalStrength(consumption * Time.deltaTime);
+        public void SetMindSystem(SisyphusMindSystem system)
+        {
+            mindSystem = system;
         }
 
         public void MoveToPosition(Vector3 newPosition)
@@ -119,5 +120,5 @@ namespace BecomeSisyphus.Systems
             OnMarkerRemoved = null;
             OnSignifierDiscovered = null;
         }
-    } 
+    }
 }
