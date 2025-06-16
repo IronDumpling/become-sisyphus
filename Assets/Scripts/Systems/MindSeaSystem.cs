@@ -9,114 +9,181 @@ namespace BecomeSisyphus.Systems
 {
     public class MindSeaSystem : ISystem
     {
-        private float baseMentalStrengthConsumption = 1f;
-        private float stormMentalStrengthConsumption = 3f;
-        private float vortexMentalStrengthConsumption = 2f;
-
-        private SisyphusMindSystem mindSystem;
+        private Dictionary<string, MindSeaRegion> regions = new Dictionary<string, MindSeaRegion>();
+        private Dictionary<string, MapMarker> markers = new Dictionary<string, MapMarker>();
         private Vector3 currentPosition;
-        private Dictionary<string, MindSeaRegion> discoveredRegions = new Dictionary<string, MindSeaRegion>();
-        private List<MapMarker> activeMarkers = new List<MapMarker>();
+        private MindSeaRegion currentRegion;
+        private SisyphusMindSystem mindSystem;
 
         public event Action<Vector3> OnPositionChanged;
-        public event Action<MindSeaRegion> OnRegionDiscovered;
-        public event Action<MapMarker> OnMarkerAdded;
-        public event Action<MapMarker> OnMarkerRemoved;
-        public event Action<Signifier> OnSignifierDiscovered;
+        public event Action<MindSeaRegion> OnRegionEntered;
+        public event Action<MapMarker> OnMarkerDiscovered;
+        public event Action<Hazard> OnHazardEncountered;
 
         public void Initialize()
         {
-            currentPosition = Vector3.zero;
+            mindSystem = GameManager.Instance.GetSystem<SisyphusMindSystem>();
+            LoadInitialRegions();
         }
 
-        public void Update() { }
-
-        public void Update(float deltaTime, float time)
+        public void Update()
         {
-            UpdateMentalStrengthConsumption(deltaTime, time);
+            UpdateCurrentRegion();
+            CheckHazards();
+            UpdateMarkers();
         }
 
-        private void HandleExplorationInput()
+        public void Navigate(Vector3 direction)
         {
-            // TODO: Implement exploration input handling
-        }
-
-        private void UpdateMentalStrengthConsumption(float deltaTime, float time)
-        {
-            float consumption = baseMentalStrengthConsumption;
-            if (IsInStorm())
+            Vector3 newPosition = currentPosition + direction;
+            if (IsValidPosition(newPosition))
             {
-                consumption += stormMentalStrengthConsumption;
+                currentPosition = newPosition;
+                OnPositionChanged?.Invoke(currentPosition);
             }
-            if (IsInVortex())
+        }
+
+        public void DiscoverRegion(string regionId)
+        {
+            if (regions.TryGetValue(regionId, out MindSeaRegion region) && !region.isDiscovered)
             {
-                consumption += vortexMentalStrengthConsumption;
+                region.isDiscovered = true;
+                UpdateRegionMarkers(region);
             }
-            if (mindSystem != null)
-                mindSystem.ConsumeMentalStrength(consumption * deltaTime, time);
         }
 
-        public void SetMindSystem(SisyphusMindSystem system)
+        public void ExploreRegion(string regionId)
         {
-            mindSystem = system;
-        }
-
-        public void MoveToPosition(Vector3 newPosition)
-        {
-            currentPosition = newPosition;
-            OnPositionChanged?.Invoke(currentPosition);
-        }
-
-        public void DiscoverRegion(MindSeaRegion region)
-        {
-            if (!discoveredRegions.ContainsKey(region.id))
+            if (regions.TryGetValue(regionId, out MindSeaRegion region) && !region.isExplored)
             {
-                discoveredRegions.Add(region.id, region);
-                OnRegionDiscovered?.Invoke(region);
+                region.isExplored = true;
+                RevealRegionSecrets(region);
             }
         }
 
         public void AddMarker(MapMarker marker)
         {
-            activeMarkers.Add(marker);
-            OnMarkerAdded?.Invoke(marker);
-        }
-
-        public void RemoveMarker(MapMarker marker)
-        {
-            if (activeMarkers.Contains(marker))
+            if (!markers.ContainsKey(marker.id))
             {
-                activeMarkers.Remove(marker);
-                OnMarkerRemoved?.Invoke(marker);
+                markers.Add(marker.id, marker);
+                if (marker.isDiscovered)
+                {
+                    OnMarkerDiscovered?.Invoke(marker);
+                }
             }
         }
 
-        public void DiscoverSignifier(Signifier signifier)
+        public void DiscoverMarker(string markerId)
         {
-            OnSignifierDiscovered?.Invoke(signifier);
+            if (markers.TryGetValue(markerId, out MapMarker marker) && !marker.isDiscovered)
+            {
+                marker.isDiscovered = true;
+                OnMarkerDiscovered?.Invoke(marker);
+            }
         }
 
-        private bool IsInStorm()
+        private void LoadInitialRegions()
         {
-            // TODO: 实现风暴区域检测
-            return false;
+            // TODO: 从配置或存档加载初始区域
         }
 
-        private bool IsInVortex()
+        private void UpdateCurrentRegion()
         {
-            // TODO: 实现漩涡区域检测
-            return false;
+            MindSeaRegion newRegion = FindRegionAtPosition(currentPosition);
+            if (newRegion != null && newRegion != currentRegion)
+            {
+                currentRegion = newRegion;
+                OnRegionEntered?.Invoke(currentRegion);
+            }
+        }
+
+        private void CheckHazards()
+        {
+            if (currentRegion != null && currentRegion.type == RegionType.Dangerous)
+            {
+                foreach (var hazard in currentRegion.hazards)
+                {
+                    if (IsWithinHazardRange(hazard))
+                    {
+                        OnHazardEncountered?.Invoke(hazard);
+                        ApplyHazardEffect(hazard);
+                    }
+                }
+            }
+        }
+
+        private void ApplyHazardEffect(Hazard hazard)
+        {
+            if (mindSystem != null)
+            {
+                float mentalDrain = hazard.intensity * Time.deltaTime;
+                mindSystem.ConsumeMentalStrength(mentalDrain, Time.deltaTime);
+            }
+        }
+
+        private void UpdateMarkers()
+        {
+            foreach (var marker in markers.Values)
+            {
+                if (!marker.isDiscovered && IsWithinMarkerRange(marker))
+                {
+                    DiscoverMarker(marker.id);
+                }
+            }
+        }
+
+        private bool IsValidPosition(Vector3 position)
+        {
+            // TODO: 实现位置有效性检查
+            return true;
+        }
+
+        private bool IsWithinHazardRange(Hazard hazard)
+        {
+            return Vector3.Distance(currentPosition, hazard.position) <= hazard.radius;
+        }
+
+        private bool IsWithinMarkerRange(MapMarker marker)
+        {
+            return Vector3.Distance(currentPosition, marker.position) <= marker.radius;
+        }
+
+        private MindSeaRegion FindRegionAtPosition(Vector3 position)
+        {
+            foreach (var region in regions.Values)
+            {
+                if (Vector3.Distance(position, region.center) <= region.radius)
+                {
+                    return region;
+                }
+            }
+            return null;
+        }
+
+        private void UpdateRegionMarkers(MindSeaRegion region)
+        {
+            foreach (var marker in region.markers)
+            {
+                if (!markers.ContainsKey(marker.id))
+                {
+                    AddMarker(marker);
+                }
+            }
+        }
+
+        private void RevealRegionSecrets(MindSeaRegion region)
+        {
+            // TODO: 实现区域秘密揭示逻辑
         }
 
         public void Cleanup()
         {
-            discoveredRegions.Clear();
-            activeMarkers.Clear();
+            regions.Clear();
+            markers.Clear();
             OnPositionChanged = null;
-            OnRegionDiscovered = null;
-            OnMarkerAdded = null;
-            OnMarkerRemoved = null;
-            OnSignifierDiscovered = null;
+            OnRegionEntered = null;
+            OnMarkerDiscovered = null;
+            OnHazardEncountered = null;
         }
     }
 }

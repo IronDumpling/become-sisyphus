@@ -17,8 +17,9 @@ namespace BecomeSisyphus.Inputs
         [Header("Controller Settings")]
         [SerializeField] private bool createOutsideWorldController = true;
         [SerializeField] private bool createThoughtBoatController = true;
-        [SerializeField] private bool createLogbookUIController = true;
+        [SerializeField] private bool createSailingUIController = true;
         [SerializeField] private bool createVesselUIController = true;
+        [SerializeField] private bool createTelescopeUIController = true;
 
         private InputActionMap currentActionMap;
         private Dictionary<string, ICommand> commandMap = new Dictionary<string, ICommand>();
@@ -26,8 +27,9 @@ namespace BecomeSisyphus.Inputs
         // Controllers
         private OutsideWorldController outsideWorldController;
         private ThoughtBoatController thoughtBoatController;
-        private LogbookUIController logbookUIController;
+        private SailingUIController sailingUIController;
         private VesselUIController vesselUIController;
+        private TelescopeUIController telescopeUIController;
 
         private void Awake()
         {
@@ -35,7 +37,7 @@ namespace BecomeSisyphus.Inputs
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
-                InitializeControllers();
+                CreateControllers();
                 InitializeInputActions();
             }
             else
@@ -44,9 +46,8 @@ namespace BecomeSisyphus.Inputs
             }
         }
 
-        private void InitializeControllers()
+        private void CreateControllers()
         {
-            // Create controllers as child objects if needed
             if (createOutsideWorldController)
             {
                 var controllerObj = new GameObject("OutsideWorldController");
@@ -61,11 +62,11 @@ namespace BecomeSisyphus.Inputs
                 thoughtBoatController = controllerObj.AddComponent<ThoughtBoatController>();
             }
 
-            if (createLogbookUIController)
+            if (createSailingUIController)
             {
-                var controllerObj = new GameObject("LogbookUIController");
+                var controllerObj = new GameObject("SailingUIController");
                 controllerObj.transform.SetParent(transform);
-                logbookUIController = controllerObj.AddComponent<LogbookUIController>();
+                sailingUIController = controllerObj.AddComponent<SailingUIController>();
             }
 
             if (createVesselUIController)
@@ -75,11 +76,21 @@ namespace BecomeSisyphus.Inputs
                 vesselUIController = controllerObj.AddComponent<VesselUIController>();
             }
 
-            // Log warnings for any missing controllers
-            if (outsideWorldController == null) Debug.LogWarning("OutsideWorldController not created!");
-            if (thoughtBoatController == null) Debug.LogWarning("ThoughtBoatController not created!");
-            if (logbookUIController == null) Debug.LogWarning("LogbookUIController not created!");
-            if (vesselUIController == null) Debug.LogWarning("VesselUIController not created!");
+            if (createTelescopeUIController)
+            {
+                var controllerObj = new GameObject("TelescopeUIController");
+                controllerObj.transform.SetParent(transform);
+                telescopeUIController = controllerObj.AddComponent<TelescopeUIController>();
+            }
+        }
+
+        private void ValidateControllers()
+        {
+            if (outsideWorldController == null && createOutsideWorldController) Debug.LogWarning("OutsideWorldController not created!");
+            if (thoughtBoatController == null && createThoughtBoatController) Debug.LogWarning("ThoughtBoatController not created!");
+            if (sailingUIController == null && createSailingUIController) Debug.LogWarning("SailingUIController not created!");
+            if (vesselUIController == null && createVesselUIController) Debug.LogWarning("VesselUIController not created!");
+            if (telescopeUIController == null && createTelescopeUIController) Debug.LogWarning("TelescopeUIController not created!");
         }
 
         private void InitializeInputActions()
@@ -90,7 +101,6 @@ namespace BecomeSisyphus.Inputs
                 return;
             }
 
-            // Enable all action maps but set them to disabled initially
             foreach (var actionMap in inputActions.actionMaps)
             {
                 actionMap.Enable();
@@ -132,11 +142,14 @@ namespace BecomeSisyphus.Inputs
                 case "InsideWorld":
                     RegisterInsideWorldCommands();
                     break;
-                case "Logbook":
-                    RegisterLogbookCommands();
+                case "Sailing":
+                    RegisterSailingCommands();
                     break;
-                case "ThoughtVessel":
-                    RegisterThoughtVesselCommands();
+                case "Vessel":
+                    RegisterVesselCommands();
+                    break;
+                case "Telescope":
+                    RegisterTelescopeCommands();
                     break;
             }
         }
@@ -154,33 +167,46 @@ namespace BecomeSisyphus.Inputs
         {
             if (thoughtBoatController == null) return;
 
-            RegisterCommand("MoveThoughtBoat", new MoveThoughtBoatCommand(thoughtBoatController, Vector2.zero));
+            RegisterCommand("MoveBoat", new MoveThoughtBoatCommand(thoughtBoatController, Vector2.zero));
             RegisterCommand("SwitchToOutsideWorld", new SwitchToOutsideWorldCommand());
-            RegisterCommand("OpenLogbookMap", new OpenLogbookMapCommand(logbookUIController));
-            RegisterCommand("OpenVesselUI", new OpenVesselUICommand(vesselUIController));
-            RegisterCommand("OpenLogbookUI", new OpenLogbookUICommand(logbookUIController));
+            RegisterCommand("UsePerceptionSkill", new UsePerceptionSkillCommand(outsideWorldController));
+            RegisterCommand("OpenVesselUI", new OpenVesselUICommand(sailingUIController));
         }
 
-        private void RegisterLogbookCommands()
+        private void RegisterSailingCommands()
         {
-            if (logbookUIController == null) return;
+            if (sailingUIController == null) return;
 
-            RegisterCommand("FlipPage", new FlipLogbookPageCommand(logbookUIController, 0));
-            RegisterCommand("MoveMap", new MoveLogbookMapCommand(logbookUIController, Vector2.zero));
-            RegisterCommand("SelectLogEntry", new SelectLogEntryCommand(logbookUIController, Vector2.zero));
-            RegisterCommand("CloseLogbook", new CloseLogbookCommand(logbookUIController));
+            RegisterCommand("OpenIslandInteraction", new OpenIslandInteractionCommand(sailingUIController, ""));
+            RegisterCommand("OpenSalvageInteraction", new OpenSalvageInteractionCommand(sailingUIController, ""));
+            RegisterCommand("OpenVesselUI", new OpenVesselUICommand(sailingUIController));
+            RegisterCommand("OpenNavigationMap", new OpenNavigationMapCommand(sailingUIController));
+            RegisterCommand("OpenTelescope", new OpenTelescopeCommand(sailingUIController));
+            RegisterCommand("SwitchToOutsideWorld", new SwitchToOutsideWorldCommand());
         }
 
-        private void RegisterThoughtVesselCommands()
+        private void RegisterVesselCommands()
         {
             if (vesselUIController == null) return;
 
-            RegisterCommand("SelectGrid", new SelectVesselGridCommand(vesselUIController, Vector2Int.zero));
-            RegisterCommand("SelectCargo", new SelectCargoInVesselCommand(vesselUIController));
-            RegisterCommand("MoveCargo", new MoveCargoInVesselCommand(vesselUIController, Vector2Int.zero));
-            RegisterCommand("RotateCargo", new RotateCargoInVesselCommand(vesselUIController));
+            RegisterCommand("SwitchMode", new SwitchVesselModeCommand(vesselUIController, VesselUIController.VesselUIMode.Grid));
+            RegisterCommand("SelectGrid", new SelectGridCommand(vesselUIController, Vector2Int.zero));
+            RegisterCommand("SelectCargo", new SelectCargoCommand(vesselUIController));
+            RegisterCommand("MoveCargo", new MoveCargoCommand(vesselUIController, Vector2Int.zero));
+            RegisterCommand("RotateCargo", new RotateCargoCommand(vesselUIController));
             RegisterCommand("ExitCargoSelection", new ExitCargoSelectionCommand(vesselUIController));
+            RegisterCommand("SelectConfusion", new SelectConfusionCommand(vesselUIController, 0));
+            RegisterCommand("SelectAbility", new SelectAbilityCommand(vesselUIController, 0));
+            RegisterCommand("MoveMap", new MoveMapCommand(vesselUIController, Vector2.zero));
             RegisterCommand("CloseVesselUI", new CloseVesselUICommand(vesselUIController));
+        }
+
+        private void RegisterTelescopeCommands()
+        {
+            if (telescopeUIController == null) return;
+
+            RegisterCommand("SwitchMode", new SwitchTelescopeModeCommand(telescopeUIController, TelescopeUIController.TelescopeMode.View));
+            RegisterCommand("CloseTelescope", new CloseTelescopeCommand(telescopeUIController));
         }
 
         public void RegisterCommand(string actionName, ICommand command)

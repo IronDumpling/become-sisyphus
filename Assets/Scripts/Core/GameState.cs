@@ -4,6 +4,9 @@ namespace BecomeSisyphus.Core
     {
         MainMenu,
         Climbing,
+        Sailing,
+        Vessel,
+        Telescope,
         ExploringMind,
         ResolvingConfusion,
         GameOver
