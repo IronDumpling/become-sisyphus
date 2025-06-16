@@ -1,6 +1,7 @@
 using System;
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Core.Data;
+using BecomeSisyphus.Core.Interfaces;
 
 namespace BecomeSisyphus.Systems
 {
@@ -23,15 +24,9 @@ namespace BecomeSisyphus.Systems
             MentalStrengthRegenRate = mentalStrengthRegenRate;
         }
 
-        public void Initialize()
-        {
-            MentalStrength = 100f;
-            MaxBrainCapacity = 100;
-            BrainCapacity = MaxBrainCapacity;
-            MentalStrengthRegenRate = 1f;
-        }
+        public void Initialize() { /* Initial values are now set by the constructor */ }
 
-        public void Update() { }
+        public void Update() { /* Parameterless Update for ISystem */ }
 
         public void Update(float deltaTime)
         {

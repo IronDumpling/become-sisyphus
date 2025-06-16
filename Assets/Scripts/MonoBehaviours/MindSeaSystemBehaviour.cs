@@ -14,6 +14,6 @@ public class MindSeaSystemBehaviour : MonoBehaviour
     void Update()
     {
         if (system != null)
-            system.Update(Time.deltaTime);
+            system.Update(Time.deltaTime, Time.time);
     }
 } 

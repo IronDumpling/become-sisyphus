@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using BecomeSisyphus.Core;
+using BecomeSisyphus.Core.Interfaces;
 
 namespace BecomeSisyphus.Systems
 {

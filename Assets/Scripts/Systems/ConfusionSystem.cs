@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BecomeSisyphus.Core;
+using BecomeSisyphus.Core.Interfaces;
 using BecomeSisyphus.Core.Data;
 
 namespace BecomeSisyphus.Systems

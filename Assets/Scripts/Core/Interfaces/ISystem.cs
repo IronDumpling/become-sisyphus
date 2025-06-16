@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BecomeSisyphus.Core
+namespace BecomeSisyphus.Core.Interfaces
 {
     public interface ISystem
     {

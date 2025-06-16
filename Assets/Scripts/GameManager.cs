@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Systems;
+using BecomeSisyphus.Core.Interfaces;
 
 namespace BecomeSisyphus
 {

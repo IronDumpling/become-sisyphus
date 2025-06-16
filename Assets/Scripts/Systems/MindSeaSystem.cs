@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Core.Data;
+using BecomeSisyphus.Core.Interfaces;
 
 namespace BecomeSisyphus.Systems
 {
@@ -30,20 +31,17 @@ namespace BecomeSisyphus.Systems
 
         public void Update() { }
 
-        public void Update(float deltaTime)
+        public void Update(float deltaTime, float time)
         {
-            // This should be called from the MonoBehaviour wrapper
-            UpdateMentalStrengthConsumption(deltaTime);
+            UpdateMentalStrengthConsumption(deltaTime, time);
         }
 
         private void HandleExplorationInput()
         {
-            // TODO: 实现探索输入处理
-            // 处理玩家输入，移动思维小船
-            // 检查是否发现新的区域、标记或能指
+            // TODO: Implement exploration input handling
         }
 
-        private void UpdateMentalStrengthConsumption(float deltaTime)
+        private void UpdateMentalStrengthConsumption(float deltaTime, float time)
         {
             float consumption = baseMentalStrengthConsumption;
             if (IsInStorm())
@@ -55,7 +53,7 @@ namespace BecomeSisyphus.Systems
                 consumption += vortexMentalStrengthConsumption;
             }
             if (mindSystem != null)
-                mindSystem.ConsumeMentalStrength(consumption * deltaTime, 0f);
+                mindSystem.ConsumeMentalStrength(consumption * deltaTime, time);
         }
 
         public void SetMindSystem(SisyphusMindSystem system)
