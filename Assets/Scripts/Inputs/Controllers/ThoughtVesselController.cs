@@ -4,7 +4,7 @@ using BecomeSisyphus.Systems;
 
 namespace BecomeSisyphus.Inputs.Controllers
 {
-    public class VesselUIController : MonoBehaviour
+    public class ThoughtVesselController : MonoBehaviour
     {
         public enum VesselUIMode
         {

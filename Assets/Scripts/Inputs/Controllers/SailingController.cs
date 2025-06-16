@@ -4,14 +4,14 @@ using BecomeSisyphus.Systems;
 
 namespace BecomeSisyphus.Inputs.Controllers
 {
-    public class SailingUIController : MonoBehaviour
+    public class SailingController : MonoBehaviour
     {
-        private MindSeaSystem mindSeaSystem;
+        private MindOceanSystem MindOceanSystem;
         private VesselSystem vesselSystem;
 
         void Awake()
         {
-            mindSeaSystem = GameManager.Instance.GetSystem<MindSeaSystem>();
+            MindOceanSystem = GameManager.Instance.GetSystem<MindOceanSystem>();
             vesselSystem = GameManager.Instance.GetSystem<VesselSystem>();
         }
 

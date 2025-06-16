@@ -6,10 +6,10 @@ namespace BecomeSisyphus.Inputs.Commands
 {
     public class SwitchVesselModeCommand : ICommand
     {
-        private readonly VesselUIController controller;
-        private readonly VesselUIController.VesselUIMode mode;
+        private readonly ThoughtVesselController controller;
+        private readonly ThoughtVesselController.VesselUIMode mode;
 
-        public SwitchVesselModeCommand(VesselUIController controller, VesselUIController.VesselUIMode mode)
+        public SwitchVesselModeCommand(ThoughtVesselController controller, ThoughtVesselController.VesselUIMode mode)
         {
             this.controller = controller;
             this.mode = mode;
@@ -24,10 +24,10 @@ namespace BecomeSisyphus.Inputs.Commands
 
     public class SelectGridCommand : ICommand
     {
-        private readonly VesselUIController controller;
+        private readonly ThoughtVesselController controller;
         private readonly Vector2Int direction;
 
-        public SelectGridCommand(VesselUIController controller, Vector2Int direction)
+        public SelectGridCommand(ThoughtVesselController controller, Vector2Int direction)
         {
             this.controller = controller;
             this.direction = direction;
@@ -42,9 +42,9 @@ namespace BecomeSisyphus.Inputs.Commands
 
     public class SelectCargoCommand : ICommand
     {
-        private readonly VesselUIController controller;
+        private readonly ThoughtVesselController controller;
 
-        public SelectCargoCommand(VesselUIController controller)
+        public SelectCargoCommand(ThoughtVesselController controller)
         {
             this.controller = controller;
         }
@@ -58,10 +58,10 @@ namespace BecomeSisyphus.Inputs.Commands
 
     public class MoveCargoCommand : ICommand
     {
-        private readonly VesselUIController controller;
+        private readonly ThoughtVesselController controller;
         private readonly Vector2Int direction;
 
-        public MoveCargoCommand(VesselUIController controller, Vector2Int direction)
+        public MoveCargoCommand(ThoughtVesselController controller, Vector2Int direction)
         {
             this.controller = controller;
             this.direction = direction;
@@ -76,9 +76,9 @@ namespace BecomeSisyphus.Inputs.Commands
 
     public class RotateCargoCommand : ICommand
     {
-        private readonly VesselUIController controller;
+        private readonly ThoughtVesselController controller;
 
-        public RotateCargoCommand(VesselUIController controller)
+        public RotateCargoCommand(ThoughtVesselController controller)
         {
             this.controller = controller;
         }
@@ -92,9 +92,9 @@ namespace BecomeSisyphus.Inputs.Commands
 
     public class ExitCargoSelectionCommand : ICommand
     {
-        private readonly VesselUIController controller;
+        private readonly ThoughtVesselController controller;
 
-        public ExitCargoSelectionCommand(VesselUIController controller)
+        public ExitCargoSelectionCommand(ThoughtVesselController controller)
         {
             this.controller = controller;
         }
@@ -108,10 +108,10 @@ namespace BecomeSisyphus.Inputs.Commands
 
     public class SelectConfusionCommand : ICommand
     {
-        private readonly VesselUIController controller;
+        private readonly ThoughtVesselController controller;
         private readonly int direction;
 
-        public SelectConfusionCommand(VesselUIController controller, int direction)
+        public SelectConfusionCommand(ThoughtVesselController controller, int direction)
         {
             this.controller = controller;
             this.direction = direction;
@@ -126,10 +126,10 @@ namespace BecomeSisyphus.Inputs.Commands
 
     public class SelectAbilityCommand : ICommand
     {
-        private readonly VesselUIController controller;
+        private readonly ThoughtVesselController controller;
         private readonly int direction;
 
-        public SelectAbilityCommand(VesselUIController controller, int direction)
+        public SelectAbilityCommand(ThoughtVesselController controller, int direction)
         {
             this.controller = controller;
             this.direction = direction;
@@ -144,10 +144,10 @@ namespace BecomeSisyphus.Inputs.Commands
 
     public class MoveMapCommand : ICommand
     {
-        private readonly VesselUIController controller;
+        private readonly ThoughtVesselController controller;
         private readonly Vector2 direction;
 
-        public MoveMapCommand(VesselUIController controller, Vector2 direction)
+        public MoveMapCommand(ThoughtVesselController controller, Vector2 direction)
         {
             this.controller = controller;
             this.direction = direction;
@@ -162,9 +162,9 @@ namespace BecomeSisyphus.Inputs.Commands
 
     public class CloseVesselUICommand : ICommand
     {
-        private readonly VesselUIController controller;
+        private readonly ThoughtVesselController controller;
 
-        public CloseVesselUICommand(VesselUIController controller)
+        public CloseVesselUICommand(ThoughtVesselController controller)
         {
             this.controller = controller;
         }

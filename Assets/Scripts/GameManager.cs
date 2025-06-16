@@ -37,7 +37,7 @@ namespace BecomeSisyphus
             CreateSystemBehaviour<SisyphusMindSystemBehaviour>("SisyphusMindSystemBehaviour");
             CreateSystemBehaviour<ConfusionSystemBehaviour>("ConfusionSystemBehaviour");
             CreateSystemBehaviour<ThoughtVesselSystemBehaviour>("ThoughtVesselSystemBehaviour");
-            CreateSystemBehaviour<MindSeaSystemBehaviour>("MindSeaSystemBehaviour");
+            CreateSystemBehaviour<MindOceanSystemBehaviour>("MindOceanSystemBehaviour");
             CreateSystemBehaviour<MemorySystemBehaviour>("MemorySystemBehaviour");
             CreateSystemBehaviour<ExplorationSystemBehaviour>("ExplorationSystemBehaviour");
             CreateSystemBehaviour<SignifierSystemBehaviour>("SignifierSystemBehaviour");
@@ -60,7 +60,7 @@ namespace BecomeSisyphus
             RegisterSystem(new ThoughtVesselSystem(config.initialRows, config.initialColumns, config.loadRatioThreshold, config.mentalStrengthConsumptionRate));
             RegisterSystem(new MemorySystem());
             RegisterSystem(new ExplorationSystem());
-            RegisterSystem(new MindSeaSystem());
+            RegisterSystem(new MindOceanSystem());
             RegisterSystem(new SignifierSystem());
             RegisterSystem(new TimeSystem(config.timeScale, config.dayLength));
         }

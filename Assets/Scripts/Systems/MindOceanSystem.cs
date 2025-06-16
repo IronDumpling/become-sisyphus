@@ -7,7 +7,7 @@ using BecomeSisyphus.Core.Interfaces;
 
 namespace BecomeSisyphus.Systems
 {
-    public class MindSeaSystem : ISystem
+    public class MindOceanSystem : ISystem
     {
         private Dictionary<string, MindSeaRegion> regions = new Dictionary<string, MindSeaRegion>();
         private Dictionary<string, MapMarker> markers = new Dictionary<string, MapMarker>();

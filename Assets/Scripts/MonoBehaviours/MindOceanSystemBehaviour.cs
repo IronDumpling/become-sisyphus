@@ -2,13 +2,13 @@ using UnityEngine;
 using BecomeSisyphus;
 using BecomeSisyphus.Systems;
 
-public class MindSeaSystemBehaviour : MonoBehaviour
+public class MindOceanSystemBehaviour : MonoBehaviour
 {
-    private MindSeaSystem system;
+    private MindOceanSystem system;
 
     void Awake()
     {
-        system = GameManager.Instance.GetSystem<MindSeaSystem>();
+        system = GameManager.Instance.GetSystem<MindOceanSystem>();
     }
 
     void Update()

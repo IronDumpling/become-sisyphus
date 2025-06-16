@@ -6,10 +6,10 @@ namespace BecomeSisyphus.Inputs.Commands
 {
     public class OpenIslandInteractionCommand : ICommand
     {
-        private readonly SailingUIController controller;
+        private readonly SailingController controller;
         private readonly string islandId;
 
-        public OpenIslandInteractionCommand(SailingUIController controller, string islandId)
+        public OpenIslandInteractionCommand(SailingController controller, string islandId)
         {
             this.controller = controller;
             this.islandId = islandId;
@@ -23,10 +23,10 @@ namespace BecomeSisyphus.Inputs.Commands
 
     public class OpenSalvageInteractionCommand : ICommand
     {
-        private readonly SailingUIController controller;
+        private readonly SailingController controller;
         private readonly string salvageId;
 
-        public OpenSalvageInteractionCommand(SailingUIController controller, string salvageId)
+        public OpenSalvageInteractionCommand(SailingController controller, string salvageId)
         {
             this.controller = controller;
             this.salvageId = salvageId;
@@ -40,9 +40,9 @@ namespace BecomeSisyphus.Inputs.Commands
 
     public class OpenNavigationMapCommand : ICommand
     {
-        private readonly SailingUIController controller;
+        private readonly SailingController controller;
 
-        public OpenNavigationMapCommand(SailingUIController controller)
+        public OpenNavigationMapCommand(SailingController controller)
         {
             this.controller = controller;
         }
@@ -55,9 +55,9 @@ namespace BecomeSisyphus.Inputs.Commands
 
     public class OpenTelescopeCommand : ICommand
     {
-        private readonly SailingUIController controller;
+        private readonly SailingController controller;
 
-        public OpenTelescopeCommand(SailingUIController controller)
+        public OpenTelescopeCommand(SailingController controller)
         {
             this.controller = controller;
         }
@@ -70,9 +70,9 @@ namespace BecomeSisyphus.Inputs.Commands
 
     public class OpenVesselUICommand : ICommand
     {
-        private readonly SailingUIController controller;
+        private readonly SailingController controller;
 
-        public OpenVesselUICommand(SailingUIController controller)
+        public OpenVesselUICommand(SailingController controller)
         {
             this.controller = controller;
         }

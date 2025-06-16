@@ -1,10 +1,11 @@
 using UnityEngine;
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Core.Data;
+using BecomeSisyphus.Systems;
 
 namespace BecomeSisyphus.Inputs.Controllers
 {
-    public class TelescopeUIController : MonoBehaviour
+    public class TelescopeController : MonoBehaviour
     {
         public enum TelescopeMode
         {

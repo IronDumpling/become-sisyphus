@@ -17,13 +17,13 @@ namespace BecomeSisyphus.Systems
         public void Initialize()
         {
             // 订阅其他系统的事件
-            var mindSeaSystem = GameManager.Instance.GetSystem<MindSeaSystem>();
+            var MindOceanSystem = GameManager.Instance.GetSystem<MindOceanSystem>();
             var vesselSystem = GameManager.Instance.GetSystem<VesselSystem>();
 
-            // 订阅MindSeaSystem事件
-            mindSeaSystem.OnRegionEntered += OnRegionEntered;
-            mindSeaSystem.OnMarkerDiscovered += OnMarkerDiscovered;
-            mindSeaSystem.OnHazardEncountered += OnHazardEncountered;
+            // 订阅MindOceanSystem事件
+            MindOceanSystem.OnRegionEntered += OnRegionEntered;
+            MindOceanSystem.OnMarkerDiscovered += OnMarkerDiscovered;
+            MindOceanSystem.OnHazardEncountered += OnHazardEncountered;
 
             // 订阅VesselSystem事件
             vesselSystem.OnCargoCombined += OnCargoCombined;
@@ -155,14 +155,14 @@ namespace BecomeSisyphus.Systems
             // 取消订阅事件
             if (GameManager.Instance != null)
             {
-                var mindSeaSystem = GameManager.Instance.GetSystem<MindSeaSystem>();
+                var MindOceanSystem = GameManager.Instance.GetSystem<MindOceanSystem>();
                 var vesselSystem = GameManager.Instance.GetSystem<VesselSystem>();
 
-                if (mindSeaSystem != null)
+                if (MindOceanSystem != null)
                 {
-                    mindSeaSystem.OnRegionEntered -= OnRegionEntered;
-                    mindSeaSystem.OnMarkerDiscovered -= OnMarkerDiscovered;
-                    mindSeaSystem.OnHazardEncountered -= OnHazardEncountered;
+                    MindOceanSystem.OnRegionEntered -= OnRegionEntered;
+                    MindOceanSystem.OnMarkerDiscovered -= OnMarkerDiscovered;
+                    MindOceanSystem.OnHazardEncountered -= OnHazardEncountered;
                 }
 
                 if (vesselSystem != null)

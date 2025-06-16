@@ -6,10 +6,10 @@ namespace BecomeSisyphus.Inputs.Commands
 {
     public class SwitchTelescopeModeCommand : ICommand
     {
-        private readonly TelescopeUIController controller;
-        private readonly TelescopeUIController.TelescopeMode mode;
+        private readonly TelescopeController controller;
+        private readonly TelescopeController.TelescopeMode mode;
 
-        public SwitchTelescopeModeCommand(TelescopeUIController controller, TelescopeUIController.TelescopeMode mode)
+        public SwitchTelescopeModeCommand(TelescopeController controller, TelescopeController.TelescopeMode mode)
         {
             this.controller = controller;
             this.mode = mode;
@@ -23,9 +23,9 @@ namespace BecomeSisyphus.Inputs.Commands
 
     public class CloseTelescopeCommand : ICommand
     {
-        private readonly TelescopeUIController controller;
+        private readonly TelescopeController controller;
 
-        public CloseTelescopeCommand(TelescopeUIController controller)
+        public CloseTelescopeCommand(TelescopeController controller)
         {
             this.controller = controller;
         }
