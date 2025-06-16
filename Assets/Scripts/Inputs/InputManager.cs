@@ -20,6 +20,7 @@ namespace BecomeSisyphus.Inputs
         [SerializeField] private bool createSailingController = true;
         [SerializeField] private bool createThoughtVesselController = true;
         [SerializeField] private bool createTelescopeController = true;
+        [SerializeField] private bool createInteractionController = true;
 
         private InputActionMap currentActionMap;
         private Dictionary<string, ICommand> commandMap = new Dictionary<string, ICommand>();
@@ -30,6 +31,7 @@ namespace BecomeSisyphus.Inputs
         private SailingController SailingController;
         private ThoughtVesselController ThoughtVesselController;
         private TelescopeController TelescopeController;
+        private InteractionController InteractionController;
 
         private void Awake()
         {
@@ -82,6 +84,13 @@ namespace BecomeSisyphus.Inputs
                 controllerObj.transform.SetParent(transform);
                 TelescopeController = controllerObj.AddComponent<TelescopeController>();
             }
+
+            if (createInteractionController)
+            {
+                var controllerObj = new GameObject("InteractionController");
+                controllerObj.transform.SetParent(transform);
+                InteractionController = controllerObj.AddComponent<InteractionController>();
+            }
         }
 
         private void ValidateControllers()
@@ -91,6 +100,7 @@ namespace BecomeSisyphus.Inputs
             if (SailingController == null && createSailingController) Debug.LogWarning("SailingController not created!");
             if (ThoughtVesselController == null && createThoughtVesselController) Debug.LogWarning("ThoughtVesselController not created!");
             if (TelescopeController == null && createTelescopeController) Debug.LogWarning("TelescopeController not created!");
+            if (InteractionController == null && createInteractionController) Debug.LogWarning("InteractionController not created!");
         }
 
         private void InitializeInputActions()
@@ -151,6 +161,9 @@ namespace BecomeSisyphus.Inputs
                 case "Telescope":
                     RegisterTelescopeCommands();
                     break;
+                case "Interaction":
+                    RegisterInteractionCommands();
+                    break;
             }
         }
 
@@ -207,6 +220,14 @@ namespace BecomeSisyphus.Inputs
 
             RegisterCommand("SwitchMode", new SwitchTelescopeModeCommand(TelescopeController, TelescopeController.TelescopeMode.View));
             RegisterCommand("CloseTelescope", new CloseTelescopeCommand(TelescopeController));
+        }
+
+        private void RegisterInteractionCommands()
+        {
+            if (InteractionController == null) return;
+
+            RegisterCommand("OpenInteraction", new OpenInteractionCommand(InteractionController, InteractionController.InteractionType.Island, ""));
+            RegisterCommand("CloseInteraction", new CloseInteractionCommand(InteractionController));
         }
 
         public void RegisterCommand(string actionName, ICommand command)
