@@ -28,11 +28,4 @@ public class GameConfiguration : ScriptableObject
     [Header("Time System")]
     public float timeScale = 1f;
     public float dayLength = 24f;
-
-    [Header("Camera System")]
-    public float cameraTransitionDuration = 1.0f;
-    public PrioritySettings cameraDefaultPriority = new PrioritySettings { Value = 10 };
-    public PrioritySettings cameraActivePriority = new PrioritySettings { Value = 20 };
-
-    // Add more configuration fields as needed for other systems
 } 

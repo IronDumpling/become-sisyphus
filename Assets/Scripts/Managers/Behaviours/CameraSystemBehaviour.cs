@@ -8,13 +8,24 @@ public class CameraSystemBehaviour : MonoBehaviour
     [SerializeField] private CinemachineCamera outsideWorldCamera;
     [SerializeField] private CinemachineCamera insideWorldCamera;
 
+    [Header("Camera Settings")]
+    [SerializeField] private float transitionDuration = 1.0f;
+    [SerializeField] private PrioritySettings defaultPriority = new PrioritySettings { Value = 10 };
+    [SerializeField] private PrioritySettings activePriority = new PrioritySettings { Value = 20 };
+
     // Properties to access cameras
     public CinemachineCamera OutsideWorldCamera => outsideWorldCamera;
     public CinemachineCamera InsideWorldCamera => insideWorldCamera;
+    
+    // Properties to access settings
+    public float TransitionDuration => transitionDuration;
+    public int DefaultPriority => defaultPriority;
+    public int ActivePriority => activePriority;
 
     private void Awake()
     {
         FindCameraReferences();
+        InitializeCameraPriorities();
     }
 
     private void OnValidate()
@@ -42,5 +53,14 @@ public class CameraSystemBehaviour : MonoBehaviour
         {
             Debug.LogError($"Camera references not set in {nameof(CameraSystemBehaviour)}! OutsideWorldCamera: {outsideWorldCamera != null}, InsideWorldCamera: {insideWorldCamera != null}");
         }
+    }
+
+    private void InitializeCameraPriorities()
+    {
+        if (outsideWorldCamera != null)
+            outsideWorldCamera.Priority.Value = defaultPriority.Value;
+        
+        if (insideWorldCamera != null)
+            insideWorldCamera.Priority.Value = defaultPriority.Value;
     }
 }

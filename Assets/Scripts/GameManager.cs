@@ -15,7 +15,6 @@ namespace BecomeSisyphus
         private Dictionary<System.Type, ISystem> systems = new Dictionary<System.Type, ISystem>();
         
         [SerializeField] private GameConfiguration config;
-        [SerializeField] private GameObject cameraManagerPrefab;
 
         private void Awake()
         {
@@ -43,18 +42,6 @@ namespace BecomeSisyphus
             CreateSystemBehaviour<ExplorationSystemBehaviour>("ExplorationSystemBehaviour");
             CreateSystemBehaviour<SignifierSystemBehaviour>("SignifierSystemBehaviour");
             CreateSystemBehaviour<TimeSystemBehaviour>("TimeSystemBehaviour");
-            
-            // Special handling for CameraManager prefab
-            if (cameraManagerPrefab != null)
-            {
-                var cameraManager = Instantiate(cameraManagerPrefab, transform);
-                cameraManager.name = "CameraManager"; // Remove the "(Clone)" suffix
-            }
-            else
-            {
-                Debug.LogError("CameraManager prefab not assigned in GameManager!");
-                CreateSystemBehaviour<CameraSystemBehaviour>("CameraSystemBehaviour");
-            }
         }
 
         private void CreateSystemBehaviour<T>(string name) where T : MonoBehaviour
@@ -95,11 +82,7 @@ namespace BecomeSisyphus
                 config.timeScale, 
                 config.dayLength
             ));
-            RegisterSystem(new CameraSystem(
-                config.cameraTransitionDuration,
-                config.cameraDefaultPriority,
-                config.cameraActivePriority
-            ));
+            RegisterSystem(new CameraSystem());
         }
 
         private void RegisterSystem(ISystem system)

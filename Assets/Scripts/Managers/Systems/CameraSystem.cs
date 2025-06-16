@@ -9,52 +9,24 @@ namespace BecomeSisyphus.Managers.Systems
     public class CameraSystem : ICameraSystem
     {
         private CameraSystemBehaviour behaviour;
-        private readonly float transitionDuration;
-        private readonly PrioritySettings defaultPriority;
-        private readonly PrioritySettings activePriority;
-
         private CinemachineCamera currentCamera;
         private Coroutine transitionCoroutine;
-
-        public CameraSystem(
-            float transitionDuration,
-            PrioritySettings defaultPriority,
-            PrioritySettings activePriority)
-        {
-            this.transitionDuration = transitionDuration;
-            this.defaultPriority = defaultPriority;
-            this.activePriority = activePriority;
-        }
 
         public void Initialize()
         {
             behaviour = GameObject.FindAnyObjectByType<CameraSystemBehaviour>();
-            if (behaviour == null)
-            {
-                Debug.LogError($"{nameof(CameraSystemBehaviour)} not found!");
-                return;
-            }
-
-            if (behaviour.OutsideWorldCamera == null || behaviour.InsideWorldCamera == null)
-            {
-                Debug.LogError($"Camera references not set in {nameof(CameraSystem)}! OutsideWorldCamera: {behaviour.OutsideWorldCamera != null}, InsideWorldCamera: {behaviour.InsideWorldCamera != null}");
-                return;
-            }
-
-            // Set initial priorities
-            behaviour.OutsideWorldCamera.Priority.Value = defaultPriority.Value;
-            behaviour.InsideWorldCamera.Priority.Value = defaultPriority.Value;
+            if (!ValidateSystemState()) return;
 
             // Set initial camera based on game state
             switch (GameManager.Instance.CurrentState)
             {
                 case GameState.Climbing:
                     currentCamera = behaviour.OutsideWorldCamera;
-                    behaviour.OutsideWorldCamera.Priority.Value = activePriority.Value;
+                    behaviour.OutsideWorldCamera.Priority.Value = behaviour.ActivePriority;
                     break;
                 case GameState.Sailing:
                     currentCamera = behaviour.InsideWorldCamera;
-                    behaviour.InsideWorldCamera.Priority.Value = activePriority.Value;
+                    behaviour.InsideWorldCamera.Priority.Value = behaviour.ActivePriority;
                     break;
             }
         }
@@ -112,25 +84,25 @@ namespace BecomeSisyphus.Managers.Systems
             float startPriority = currentCamera.Priority.Value;
             float oldCameraPriority = startPriority;
 
-            while (elapsedTime < transitionDuration)
+            while (elapsedTime < behaviour.TransitionDuration)
             {
                 elapsedTime += Time.deltaTime;
-                float t = elapsedTime / transitionDuration;
+                float t = elapsedTime / behaviour.TransitionDuration;
 
                 // Smoothly decrease current camera's priority
-                oldCameraPriority = Mathf.Lerp(startPriority, defaultPriority.Value, t);
+                oldCameraPriority = Mathf.Lerp(startPriority, behaviour.DefaultPriority, t);
                 currentCamera.Priority.Value = Mathf.RoundToInt(oldCameraPriority);
 
                 // Smoothly increase target camera's priority
-                float newPriority = Mathf.Lerp(defaultPriority.Value, activePriority.Value, t);
+                float newPriority = Mathf.Lerp(behaviour.DefaultPriority, behaviour.ActivePriority, t);
                 targetCamera.Priority.Value = Mathf.RoundToInt(newPriority);
 
                 yield return null;
             }
 
             // Ensure final priorities are set correctly
-            currentCamera.Priority.Value = defaultPriority.Value;
-            targetCamera.Priority.Value = activePriority.Value;
+            currentCamera.Priority.Value = behaviour.DefaultPriority;
+            targetCamera.Priority.Value = behaviour.ActivePriority;
             currentCamera = targetCamera;
         }
 
