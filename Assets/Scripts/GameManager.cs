@@ -15,7 +15,8 @@ namespace BecomeSisyphus
         private Dictionary<System.Type, ISystem> systems = new Dictionary<System.Type, ISystem>();
         
         [SerializeField] private GameConfiguration config;
-        
+        [SerializeField] private GameObject cameraManagerPrefab;
+
         private void Awake()
         {
             if (Instance == null)
@@ -42,6 +43,18 @@ namespace BecomeSisyphus
             CreateSystemBehaviour<ExplorationSystemBehaviour>("ExplorationSystemBehaviour");
             CreateSystemBehaviour<SignifierSystemBehaviour>("SignifierSystemBehaviour");
             CreateSystemBehaviour<TimeSystemBehaviour>("TimeSystemBehaviour");
+            
+            // Special handling for CameraManager prefab
+            if (cameraManagerPrefab != null)
+            {
+                var cameraManager = Instantiate(cameraManagerPrefab, transform);
+                cameraManager.name = "CameraManager"; // Remove the "(Clone)" suffix
+            }
+            else
+            {
+                Debug.LogError("CameraManager prefab not assigned in GameManager!");
+                CreateSystemBehaviour<CameraSystemBehaviour>("CameraSystemBehaviour");
+            }
         }
 
         private void CreateSystemBehaviour<T>(string name) where T : MonoBehaviour
@@ -54,15 +67,39 @@ namespace BecomeSisyphus
         private void InitializeSystems()
         {
             // Use config to initialize each system with parameters
-            RegisterSystem(new SisyphusManager(config.managerMentalStrength, config.managerMaxBrainCapacity, config.managerMentalStrengthRegenRate));
-            RegisterSystem(new SisyphusMindSystem(config.maxMentalStrength, config.mentalStrengthRegenRate, config.mentalStrengthRegenDelay));
-            RegisterSystem(new ConfusionSystem(config.confusionGenerationInterval, config.temporaryConfusionDuration));
-            RegisterSystem(new ThoughtVesselSystem(config.initialRows, config.initialColumns, config.loadRatioThreshold, config.mentalStrengthConsumptionRate));
+            RegisterSystem(new SisyphusManager(
+                config.managerMentalStrength, 
+                config.managerMaxBrainCapacity, 
+                config.managerMentalStrengthRegenRate
+            ));
+            RegisterSystem(new SisyphusMindSystem(
+                config.maxMentalStrength, 
+                config.mentalStrengthRegenRate, 
+                config.mentalStrengthRegenDelay
+            ));
+            RegisterSystem(new ConfusionSystem(
+                config.confusionGenerationInterval, 
+                config.temporaryConfusionDuration
+            ));
+            RegisterSystem(new ThoughtVesselSystem(
+                config.initialRows, 
+                config.initialColumns, 
+                config.loadRatioThreshold, 
+                config.mentalStrengthConsumptionRate
+            ));
             RegisterSystem(new MemorySystem());
             RegisterSystem(new ExplorationSystem());
             RegisterSystem(new MindOceanSystem());
             RegisterSystem(new SignifierSystem());
-            RegisterSystem(new TimeSystem(config.timeScale, config.dayLength));
+            RegisterSystem(new TimeSystem(
+                config.timeScale, 
+                config.dayLength
+            ));
+            RegisterSystem(new CameraSystem(
+                config.cameraTransitionDuration,
+                config.cameraDefaultPriority,
+                config.cameraActivePriority
+            ));
         }
 
         private void RegisterSystem(ISystem system)

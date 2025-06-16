@@ -2,6 +2,7 @@ using UnityEngine;
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Core.Interfaces;
 using BecomeSisyphus.Inputs.Controllers;
+using BecomeSisyphus.Managers.Systems;
 
 namespace BecomeSisyphus.Inputs.Commands
 {
@@ -27,8 +28,8 @@ namespace BecomeSisyphus.Inputs.Commands
         public void Execute()
         {
             GameManager.Instance.ChangeState(GameState.Sailing);
+            GameManager.Instance.GetSystem<CameraSystem>().SwitchToInsideWorld();
             Debug.Log("Switching to Inside World (Sailing State)");
-            // TODO: Also disable/enable relevant cameras/UI here or in a state manager
         }
     }
 } 

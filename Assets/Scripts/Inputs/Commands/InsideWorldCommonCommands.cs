@@ -3,6 +3,7 @@ using BecomeSisyphus.Core;
 using BecomeSisyphus.Core.Data;
 using BecomeSisyphus.Core.Interfaces;
 using BecomeSisyphus.Inputs.Controllers;
+using BecomeSisyphus.Managers.Systems;
 
 namespace BecomeSisyphus.Inputs.Commands
 {
@@ -28,8 +29,8 @@ namespace BecomeSisyphus.Inputs.Commands
         public void Execute()
         {
             GameManager.Instance.ChangeState(GameState.Climbing);
+            GameManager.Instance.GetSystem<CameraSystem>().SwitchToOutsideWorld();
             Debug.Log("Switching to Outside World (Climbing State)");
-            // TODO: Also disable/enable relevant cameras/UI here or in a state manager
         }
     }
 
