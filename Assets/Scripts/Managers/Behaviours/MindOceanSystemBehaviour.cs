@@ -1,6 +1,6 @@
 using UnityEngine;
 using BecomeSisyphus;
-using BecomeSisyphus.Systems;
+using BecomeSisyphus.Managers.Systems;
 
 public class MindOceanSystemBehaviour : MonoBehaviour
 {

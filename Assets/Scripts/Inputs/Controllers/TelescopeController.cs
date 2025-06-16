@@ -1,7 +1,7 @@
 using UnityEngine;
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Core.Data;
-using BecomeSisyphus.Systems;
+using BecomeSisyphus.Managers.Systems;
 
 namespace BecomeSisyphus.Inputs.Controllers
 {

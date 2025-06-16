@@ -3,7 +3,7 @@ using System;
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Core.Interfaces;
 
-namespace BecomeSisyphus.Systems
+namespace BecomeSisyphus.Managers.Systems
 {
     public class TimeSystem : ISystem
     {

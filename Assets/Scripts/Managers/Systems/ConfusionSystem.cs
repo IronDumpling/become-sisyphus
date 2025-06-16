@@ -4,7 +4,7 @@ using BecomeSisyphus.Core;
 using BecomeSisyphus.Core.Interfaces;
 using BecomeSisyphus.Core.Data;
 
-namespace BecomeSisyphus.Systems
+namespace BecomeSisyphus.Managers.Systems
 {
     public class ConfusionSystem : ISystem
     {
