@@ -139,31 +139,40 @@ namespace BecomeSisyphus.Inputs
                 case "OutsideWorld":
                     RegisterOutsideWorldCommands();
                     break;
-                case "InsideWorld":
-                    RegisterInsideWorldCommands();
-                    break;
                 case "BoatSailing":
                     RegisterBoatSailingCommands();
+                    RegisterInsideWorldCommands();
                     break;
                 case "BoatInteraction":
                     RegisterBoatInteractionCommands();
+                    RegisterInsideWorldCommands();
                     break;
                 case "ThoughtVessel":
                     RegisterThoughtVesselCommands();
+                    RegisterInsideWorldCommands();
                     break;
                 case "Telescope":
                     RegisterTelescopeCommands();
+                    RegisterInsideWorldCommands();
                     break;
             }
         }
 
         private void RegisterOutsideWorldCommands()
         {
-            if (outsideWorldController == null) return;
+            if (outsideWorldController == null) 
+            {
+                Debug.LogError("InputManager: outsideWorldController is null in RegisterOutsideWorldCommands!");
+                return;
+            }
+
+            Debug.Log("InputManager: Registering OutsideWorld commands...");
 
             RegisterCommand("SelectSignifier", new SelectSignifierCommand(outsideWorldController, Vector2.zero));
             RegisterCommand("SwitchToInsideWorld", new SwitchToInsideWorldCommand());
             RegisterCommand("UsePerceptionSkill", new UsePerceptionSkillCommand(outsideWorldController));
+
+            Debug.Log("InputManager: Finished registering OutsideWorld commands");
         }
 
         private void RegisterInsideWorldCommands()
@@ -176,7 +185,13 @@ namespace BecomeSisyphus.Inputs
 
         private void RegisterBoatSailingCommands()
         {
-            if (thoughtBoatSailingController == null) return;
+            if (thoughtBoatSailingController == null) 
+            {
+                Debug.LogError("InputManager: thoughtBoatSailingController is null in RegisterBoatSailingCommands!");
+                return;
+            }
+
+            Debug.Log("InputManager: Registering BoatSailing commands...");
 
             RegisterCommand("MoveBoat", new MoveBoatCommand(thoughtBoatSailingController, Vector2.zero));
             RegisterCommand("StopBoat", new StopBoatCommand(thoughtBoatSailingController));
@@ -189,6 +204,9 @@ namespace BecomeSisyphus.Inputs
             RegisterCommand("OpenVesselUI", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Vessel));
             RegisterCommand("OpenNavigationMap", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.NavigationMap));
             RegisterCommand("OpenTelescope", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Telescope));
+            // RegisterCommand("SwitchToOutsideWorld", new SwitchToOutsideWorldCommand());
+
+            Debug.Log("InputManager: Finished registering BoatSailing commands");
         }
 
         private void RegisterBoatInteractionCommands()
@@ -250,13 +268,18 @@ namespace BecomeSisyphus.Inputs
 
         public void ExecuteCommand(string actionName)
         {
+            Debug.Log($"InputManager: Attempting to execute command: {actionName}");
+            
             if (commandMap.TryGetValue(actionName, out ICommand command))
             {
+                Debug.Log($"InputManager: Found command for {actionName}, executing...");
                 command.Execute();
+                Debug.Log($"InputManager: Command {actionName} executed successfully");
             }
             else
             {
-                Debug.LogWarning($"No command registered for action: {actionName}");
+                Debug.LogWarning($"InputManager: No command registered for action: {actionName}");
+                Debug.LogWarning($"InputManager: Available commands: {string.Join(", ", commandMap.Keys)}");
             }
         }
 

@@ -1,5 +1,8 @@
 using UnityEngine;
+
+using System.Linq;
 using System.Collections.Generic;
+
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Managers.Systems;
 using BecomeSisyphus.Core.Interfaces;
@@ -53,49 +56,85 @@ namespace BecomeSisyphus
 
         private void InitializeSystems()
         {
-            // Use config to initialize each system with parameters
-            RegisterSystem(new SisyphusManager(
-                config.managerMentalStrength, 
-                config.managerMaxBrainCapacity, 
-                config.managerMentalStrengthRegenRate
-            ));
-            RegisterSystem(new SisyphusMindSystem(
-                config.maxMentalStrength, 
-                config.mentalStrengthRegenRate, 
-                config.mentalStrengthRegenDelay
-            ));
-            RegisterSystem(new ConfusionSystem(
-                config.confusionGenerationInterval, 
-                config.temporaryConfusionDuration
-            ));
-            RegisterSystem(new ThoughtVesselSystem(
-                config.initialRows, 
-                config.initialColumns, 
-                config.loadRatioThreshold, 
-                config.mentalStrengthConsumptionRate
-            ));
-            RegisterSystem(new MemorySystem());
-            RegisterSystem(new ExplorationSystem());
-            RegisterSystem(new MindOceanSystem());
-            RegisterSystem(new SignifierSystem());
-            RegisterSystem(new TimeSystem(
-                config.timeScale, 
-                config.dayLength
-            ));
+            try
+            {
+                if (config == null)
+                {
+                    Debug.LogError("GameManager: GameConfiguration is not set in inspector!");
+                    return;
+                }
+
+                // 基础系统先初始化
+                RegisterSystem(new TimeSystem(config.timeScale, config.dayLength));
+                // RegisterSystem(new CameraSystem());
+                
+                // 核心游戏系统
+                RegisterSystem(new SisyphusManager(
+                    config.managerMentalStrength, 
+                    config.managerMaxBrainCapacity, 
+                    config.managerMentalStrengthRegenRate
+                ));
+                RegisterSystem(new SisyphusMindSystem(
+                    config.maxMentalStrength, 
+                    config.mentalStrengthRegenRate, 
+                    config.mentalStrengthRegenDelay
+                ));
+                
+                // 游戏机制系统
+                RegisterSystem(new ConfusionSystem(
+                    config.confusionGenerationInterval, 
+                    config.temporaryConfusionDuration
+                ));
+                RegisterSystem(new ThoughtVesselSystem(
+                    config.initialRows, 
+                    config.initialColumns, 
+                    config.loadRatioThreshold, 
+                    config.mentalStrengthConsumptionRate
+                ));
+                
+                // 辅助系统
+                RegisterSystem(new MemorySystem());
+                RegisterSystem(new ExplorationSystem());
+                RegisterSystem(new MindOceanSystem());
+                RegisterSystem(new SignifierSystem());
+
+                Debug.Log("GameManager: All systems initialized successfully");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"GameManager: Failed to initialize systems: {e.Message}");
+            }
         }
 
         private void RegisterSystem(ISystem system)
         {
-            systems[system.GetType()] = system;
-            system.Initialize();
+            try
+            {
+                Debug.Log($"GameManager: Registering system: {system.GetType().Name}");
+                systems[system.GetType()] = system;
+                Debug.Log($"GameManager: Initializing system: {system.GetType().Name}");
+                system.Initialize();
+                Debug.Log($"GameManager: System {system.GetType().Name} registered and initialized successfully");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"GameManager: Failed to register system {system.GetType().Name}: {e.Message}");
+                throw; // 重新抛出异常以便上层处理
+            }
         }
 
         public T GetSystem<T>() where T : ISystem
         {
+            Debug.Log($"GameManager: Attempting to get system: {typeof(T).Name}");
+            
             if (systems.TryGetValue(typeof(T), out ISystem system))
             {
+                Debug.Log($"GameManager: Found system: {typeof(T).Name}");
                 return (T)system;
             }
+            
+            // Debug.LogError($"GameManager: System not found: {typeof(T).Name}");
+            // Debug.LogError($"GameManager: Available systems: {string.Join(", ", systems.Keys.Select(k => k.Name))}");
             return default;
         }
 

@@ -11,7 +11,7 @@ namespace BecomeSisyphus.Managers.Systems
     {
         private SisyphusManager sisyphusManager;
         private Vector3 currentPosition;
-        private float explorationSpeed = 5f;
+        // private float explorationSpeed = 5f;
         private float mentalStrengthConsumptionRate = 2f;
 
         public event Action<Vector3> OnPositionChanged;

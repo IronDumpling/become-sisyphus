@@ -11,9 +11,30 @@ namespace BecomeSisyphus.Inputs.Commands
     {
         public void Execute()
         {
+            Debug.Log("SwitchToOutsideWorldCommand: Starting execution...");
+            
+            if (GameManager.Instance == null)
+            {
+                Debug.LogError("SwitchToOutsideWorldCommand: GameManager.Instance is null!");
+                return;
+            }
+            
+            Debug.Log("SwitchToOutsideWorldCommand: Changing game state to Climbing...");
             GameManager.Instance.ChangeState(GameState.Climbing);
-            GameManager.Instance.GetSystem<CameraSystem>().SwitchToOutsideWorld();
-            Debug.Log("Switching to Outside World (Climbing State)");
+            
+            Debug.Log("SwitchToOutsideWorldCommand: Getting CameraSystem...");
+            var cameraSystem = GameManager.Instance.GetSystem<CameraSystem>();
+            
+            if (cameraSystem == null)
+            {
+                Debug.LogError("SwitchToOutsideWorldCommand: CameraSystem is null!");
+                return;
+            }
+            
+            Debug.Log("SwitchToOutsideWorldCommand: Calling SwitchToOutsideWorld...");
+            cameraSystem.SwitchToOutsideWorld();
+            
+            Debug.Log("SwitchToOutsideWorldCommand: Execution completed - Switched to Outside World (Climbing State)");
         }
     }
 

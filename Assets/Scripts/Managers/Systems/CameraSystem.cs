@@ -14,45 +14,90 @@ namespace BecomeSisyphus.Managers.Systems
 
         public void Initialize()
         {
+            Debug.Log("CameraSystem: Starting initialization...");
+            
             behaviour = GameObject.FindAnyObjectByType<CameraSystemBehaviour>();
+            Debug.Log($"CameraSystem: Found CameraSystemBehaviour: {behaviour != null}");
+            
             if (!ValidateSystemState()) return;
 
+            Debug.Log($"CameraSystem: Current game state: {GameManager.Instance.CurrentState}");
+            
             // Set initial camera based on game state
             switch (GameManager.Instance.CurrentState)
             {
                 case GameState.Climbing:
+                    Debug.Log("CameraSystem: Setting initial camera to OutsideWorldCamera");
                     currentCamera = behaviour.OutsideWorldCamera;
                     behaviour.OutsideWorldCamera.Priority.Value = behaviour.ActivePriority;
                     break;
                 case GameState.Sailing:
+                    Debug.Log("CameraSystem: Setting initial camera to InsideWorldCamera");
                     currentCamera = behaviour.InsideWorldCamera;
                     behaviour.InsideWorldCamera.Priority.Value = behaviour.ActivePriority;
                     break;
+                default:
+                    Debug.LogWarning($"CameraSystem: Unknown game state: {GameManager.Instance.CurrentState}");
+                    break;
             }
+            
+            Debug.Log("CameraSystem: Initialization completed");
         }
 
         public void SwitchToOutsideWorld()
         {
-            if (!ValidateSystemState()) return;
-            if (currentCamera == behaviour.OutsideWorldCamera) return;
+            Debug.Log("CameraSystem: SwitchToOutsideWorld called");
+            
+            if (!ValidateSystemState()) 
+            {
+                Debug.LogError("CameraSystem: ValidateSystemState failed in SwitchToOutsideWorld");
+                return;
+            }
+            
+            if (currentCamera == behaviour.OutsideWorldCamera) 
+            {
+                Debug.Log("CameraSystem: Already using OutsideWorldCamera, skipping switch");
+                return;
+            }
+            
+            Debug.Log("CameraSystem: Starting transition to OutsideWorldCamera");
             
             if (transitionCoroutine != null)
+            {
+                Debug.Log("CameraSystem: Stopping existing transition coroutine");
                 behaviour.StopCoroutine(transitionCoroutine);
+            }
 
             transitionCoroutine = behaviour.StartCoroutine(TransitionToCamera(behaviour.OutsideWorldCamera));
-            Debug.Log("Switching to Outside World Camera");
+            Debug.Log("CameraSystem: Transition to Outside World Camera started");
         }
 
         public void SwitchToInsideWorld()
         {
-            if (!ValidateSystemState()) return;
-            if (currentCamera == behaviour.InsideWorldCamera) return;
+            Debug.Log("CameraSystem: SwitchToInsideWorld called");
+            
+            if (!ValidateSystemState()) 
+            {
+                Debug.LogError("CameraSystem: ValidateSystemState failed in SwitchToInsideWorld");
+                return;
+            }
+            
+            if (currentCamera == behaviour.InsideWorldCamera) 
+            {
+                Debug.Log("CameraSystem: Already using InsideWorldCamera, skipping switch");
+                return;
+            }
+            
+            Debug.Log("CameraSystem: Starting transition to InsideWorldCamera");
 
             if (transitionCoroutine != null)
+            {
+                Debug.Log("CameraSystem: Stopping existing transition coroutine");
                 behaviour.StopCoroutine(transitionCoroutine);
+            }
 
             transitionCoroutine = behaviour.StartCoroutine(TransitionToCamera(behaviour.InsideWorldCamera));
-            Debug.Log("Switching to Inside World Camera");
+            Debug.Log("CameraSystem: Transition to Inside World Camera started");
         }
 
         private bool ValidateSystemState()
