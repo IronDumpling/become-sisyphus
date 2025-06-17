@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using BecomeSisyphus.Core.GameStateSystem;
 
 namespace BecomeSisyphus.UI.Components
 {
@@ -118,6 +119,12 @@ namespace BecomeSisyphus.UI.Components
             //         gameObject.SetActive(false);
             //         OnWindowClosed();
             //     });
+
+            // 切换到航行状态
+            if (GameStateManager.Instance != null)
+            {
+                GameStateManager.Instance.SwitchToState("InsideGame/InsideWorld/Sailing");
+            }
 
             OnWindowClosing();
         }

@@ -12,10 +12,7 @@ namespace BecomeSisyphus.UI.Components
     {
         [Header("Harbour Specific UI")]
         [SerializeField] private Button restButton;
-        [SerializeField] private Button startSailingButton;
-        [SerializeField] private Button enterOutsideWorldButton;
         [SerializeField] private TextMeshProUGUI restStatusText;
-        [SerializeField] private Slider restProgressSlider;
 
         [Header("Rest Settings")]
         [SerializeField] private float restDuration = 5f;
@@ -31,20 +28,12 @@ namespace BecomeSisyphus.UI.Components
             // 设置按钮事件
             if (restButton != null)
                 restButton.onClick.AddListener(StartResting);
-            
-            if (startSailingButton != null)
-                startSailingButton.onClick.AddListener(StartSailing);
-            
-            if (enterOutsideWorldButton != null)
-                enterOutsideWorldButton.onClick.AddListener(EnterOutsideWorld);
         }
 
         protected override void InitializeWindow()
         {
-            SetTitle("港口休息站");
+            SetTitle("港口");
             SetDescription("在这里你可以安全地休息，恢复精神力量。");
-            
-            UpdateUI();
         }
 
         private void Update()
@@ -83,9 +72,6 @@ namespace BecomeSisyphus.UI.Components
             
             UpdateRestStatus("休息完成");
             
-            if (restProgressSlider != null)
-                restProgressSlider.value = 0f;
-            
             Debug.Log("HarbourInteractionWindow: Stopped resting");
         }
 
@@ -96,9 +82,6 @@ namespace BecomeSisyphus.UI.Components
         {
             restTimer += Time.deltaTime;
             float progress = restTimer / restDuration;
-            
-            if (restProgressSlider != null)
-                restProgressSlider.value = progress;
             
             // 应用休息效果
             ApplyRestEffect();
@@ -127,49 +110,6 @@ namespace BecomeSisyphus.UI.Components
         }
 
         /// <summary>
-        /// 开始航行
-        /// </summary>
-        private void StartSailing()
-        {
-            Debug.Log("HarbourInteractionWindow: Starting sailing");
-            
-            // 切换到航行状态
-            if (GameStateManager.Instance != null)
-            {
-                GameStateManager.Instance.SwitchToState("InsideGame/InsideWorld/Sailing");
-            }
-            
-            CloseWindow();
-        }
-
-        /// <summary>
-        /// 进入外部世界
-        /// </summary>
-        private void EnterOutsideWorld()
-        {
-            Debug.Log("HarbourInteractionWindow: Entering outside world");
-            
-            // 切换到外部世界
-            if (GameStateManager.Instance != null)
-            {
-                GameStateManager.Instance.SwitchToLastOutsideWorldState();
-            }
-            
-            CloseWindow();
-        }
-
-        /// <summary>
-        /// 更新UI状态
-        /// </summary>
-        private void UpdateUI()
-        {
-            UpdateRestStatus(isResting ? "正在休息中..." : "准备休息");
-            
-            if (restProgressSlider != null)
-                restProgressSlider.value = isResting ? (restTimer / restDuration) : 0f;
-        }
-
-        /// <summary>
         /// 更新休息状态文本
         /// </summary>
         private void UpdateRestStatus(string status)
@@ -195,12 +135,6 @@ namespace BecomeSisyphus.UI.Components
             
             if (restButton != null)
                 restButton.onClick.RemoveAllListeners();
-            
-            if (startSailingButton != null)
-                startSailingButton.onClick.RemoveAllListeners();
-            
-            if (enterOutsideWorldButton != null)
-                enterOutsideWorldButton.onClick.RemoveAllListeners();
         }
     }
 } 

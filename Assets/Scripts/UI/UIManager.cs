@@ -77,8 +77,7 @@ namespace BecomeSisyphus.UI
             {
                 showProgressBar = false,
                 showTimeUI = false,
-                hintText = "Press Enter to start climbing",
-                keyHints = "Enter: Start Climbing",
+                hintText = "Press: [Enter] to Start Climbing",
                 windowType = WindowType.None
             };
 
@@ -86,8 +85,14 @@ namespace BecomeSisyphus.UI
             {
                 showProgressBar = true,
                 showTimeUI = true,
-                hintText = "",
-                keyHints = "Space: Enter Inner World",
+                hintText = "Press: [Space] to Enter Inner World",
+                windowType = WindowType.None
+            };
+
+            stateUIConfigs["InsideGame/InsideWorld"] = new UIStateConfig
+            {
+                showProgressBar = true,
+                showTimeUI = true,
                 windowType = WindowType.None
             };
 
@@ -96,18 +101,24 @@ namespace BecomeSisyphus.UI
             {
                 showProgressBar = true,
                 showTimeUI = true,
-                hintText = "",
-                keyHints = "WASD: Move Boat, Space: Enter Outer World",
+                hintText = "Press: [WASD] to Start Sailing",
                 windowType = WindowType.None
             };
 
             // Inside World States - Interactions
+            stateUIConfigs["InsideGame/InsideWorld/Interaction"] = new UIStateConfig
+            {
+                showProgressBar = true,
+                showTimeUI = true,
+                hintText = "Press: [Esc] to Stop Resting",
+                windowType = WindowType.None
+            };
+
             stateUIConfigs["InsideGame/InsideWorld/Interaction/Harbour"] = new UIStateConfig
             {
                 showProgressBar = true,
                 showTimeUI = true,
-                hintText = "",
-                keyHints = "Esc: Stop Resting, Start Sailing",
+                hintText = "Press: [Esc] to Stop Resting",
                 windowType = WindowType.Harbour
             };
 
@@ -115,8 +126,7 @@ namespace BecomeSisyphus.UI
             {
                 showProgressBar = true,
                 showTimeUI = true,
-                hintText = "",
-                keyHints = "Esc: Close Interaction",
+                hintText = "Press: [Esc] to Stop Resting",
                 windowType = WindowType.Lighthouse
             };
 
@@ -124,8 +134,7 @@ namespace BecomeSisyphus.UI
             {
                 showProgressBar = true,
                 showTimeUI = true,
-                hintText = "",
-                keyHints = "Esc: Close Interaction",
+                hintText = "Press: [Esc] to Stop Salvaging",
                 windowType = WindowType.Salvage
             };
 
@@ -133,8 +142,7 @@ namespace BecomeSisyphus.UI
             {
                 showProgressBar = true,
                 showTimeUI = true,
-                hintText = "",
-                keyHints = "Esc: Close Interaction",
+                hintText = "Press: [Esc] to Stop Interaction",
                 windowType = WindowType.Island
             };
 
@@ -146,12 +154,8 @@ namespace BecomeSisyphus.UI
         /// </summary>
         private void OnGameStateChanged(IGameState previousState, IGameState newState)
         {
-            // 获取实际的活跃叶子状态
-            var activeState = newState?.GetActiveLeafState() ?? newState;
-            var previousActiveState = previousState?.GetActiveLeafState() ?? previousState;
-            
-            Debug.Log($"UIManager: State changed from {previousActiveState?.GetFullStatePath()} to {activeState?.GetFullStatePath()}");
-            UpdateUIForState(activeState);
+            Debug.Log($"UIManager: State changed from {previousState?.GetFullStatePath()} to {newState?.GetFullStatePath()}");
+            UpdateUIForState(newState);
         }
 
         /// <summary>
@@ -249,20 +253,11 @@ namespace BecomeSisyphus.UI
             {
                 GameObject hintText = Instantiate(hintTextPrefab, hintContainer);
                 
-                // 使用HintTextComponent设置文本内容
-                var hintComponent = hintText.GetComponent<BecomeSisyphus.UI.Components.HintTextComponent>();
-                if (hintComponent != null)
+                // 设置文本内容
+                var textComponent = hintText.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+                if (textComponent != null)
                 {
-                    hintComponent.SetText(text);
-                }
-                else
-                {
-                    // 回退到直接设置TextMeshPro组件
-                    var textComponent = hintText.GetComponentInChildren<TMPro.TextMeshProUGUI>();
-                    if (textComponent != null)
-                    {
-                        textComponent.text = text;
-                    }
+                    textComponent.text = text;
                 }
 
                 activeUIComponents["HintText"] = hintText;
@@ -279,20 +274,11 @@ namespace BecomeSisyphus.UI
             {
                 GameObject keyHints = Instantiate(keyHintsPrefab, hintContainer);
                 
-                // 使用KeyHintsComponent设置提示内容
-                var hintsComponent = keyHints.GetComponent<BecomeSisyphus.UI.Components.KeyHintsComponent>();
-                if (hintsComponent != null)
+                // 设置提示内容
+                var textComponent = keyHints.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+                if (textComponent != null)
                 {
-                    hintsComponent.SetHints(hints);
-                }
-                else
-                {
-                    // 回退到直接设置TextMeshPro组件
-                    var textComponent = keyHints.GetComponentInChildren<TMPro.TextMeshProUGUI>();
-                    if (textComponent != null)
-                    {
-                        textComponent.text = hints;
-                    }
+                    textComponent.text = hints;
                 }
 
                 activeUIComponents["KeyHints"] = keyHints;
