@@ -8,9 +8,24 @@ namespace BecomeSisyphus.Managers.Behaviours
     {
         private ThoughtBoatSystem system;
 
-        void Awake()
+        void Start()
         {
-            system = GameManager.Instance.GetSystem<ThoughtBoatSystem>();
+            if (GameManager.Instance != null)
+            {
+                system = GameManager.Instance.GetSystem<ThoughtBoatSystem>();
+                if (system != null)
+                {
+                    Debug.Log("ThoughtBoatSystemBehaviour: Successfully got ThoughtBoatSystem reference");
+                }
+                else
+                {
+                    Debug.LogError("ThoughtBoatSystemBehaviour: Failed to get ThoughtBoatSystem reference");
+                }
+            }
+            else
+            {
+                Debug.LogError("ThoughtBoatSystemBehaviour: GameManager.Instance is null");
+            }
         }
 
         void Update()

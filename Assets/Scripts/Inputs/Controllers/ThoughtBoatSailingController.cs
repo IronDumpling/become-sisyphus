@@ -57,8 +57,11 @@ namespace BecomeSisyphus.Inputs.Controllers
                 rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
                 Debug.Log("ThoughtBoatSailingController: Added Rigidbody2D component");
             }
+        }
 
-            // Get system references
+        private void Start()
+        {
+            // Get system references in Start() to ensure GameManager is fully initialized
             if (GameManager.Instance != null)
             {
                 mindSystem = GameManager.Instance.GetSystem<SisyphusMindSystem>();
@@ -66,15 +69,20 @@ namespace BecomeSisyphus.Inputs.Controllers
                 mindOceanSystem = GameManager.Instance.GetSystem<MindOceanSystem>();
                 explorationSystem = GameManager.Instance.GetSystem<ExplorationSystem>();
                 vesselSystem = GameManager.Instance.GetSystem<VesselSystem>();
+                
+                Debug.Log($"ThoughtBoatSailingController: Got system references - " +
+                         $"MindSystem={mindSystem != null}, " +
+                         $"BoatSystem={boatSystem != null}, " +
+                         $"MindOceanSystem={mindOceanSystem != null}, " +
+                         $"ExplorationSystem={explorationSystem != null}, " +
+                         $"VesselSystem={vesselSystem != null}");
             }
             else
             {
-                Debug.LogWarning("ThoughtBoatSailingController: GameManager.Instance is null in Awake");
+                Debug.LogError("ThoughtBoatSailingController: GameManager.Instance is null in Start");
+                return;
             }
-        }
 
-        private void Start()
-        {
             // Register to ThoughtBoatSystem
             if (boatSystem != null)
             {
@@ -84,6 +92,12 @@ namespace BecomeSisyphus.Inputs.Controllers
             else
             {
                 Debug.LogWarning("ThoughtBoatSailingController: boatSystem is null, cannot register");
+                
+                // Add more debugging information
+                if (GameManager.Instance != null)
+                {
+                    Debug.LogWarning("ThoughtBoatSailingController: GameManager exists but ThoughtBoatSystem not found. Check if ThoughtBoatSystem is properly registered in GameManager.InitializeSystems()");
+                }
             }
         }
 
@@ -101,34 +115,57 @@ namespace BecomeSisyphus.Inputs.Controllers
                 // Calculate target velocity
                 Vector2 targetVelocity = moveDirection * moveSpeed;
                 
-                // Smoothly interpolate current velocity
+                // Smoothly accelerate to target velocity
                 rb.linearVelocity = Vector2.Lerp(rb.linearVelocity, targetVelocity, 
-                    Time.fixedDeltaTime / (isMoving ? accelerationTime : decelerationTime));
+                    Time.fixedDeltaTime / accelerationTime);
 
                 // Handle rotation
-                if (moveDirection != Vector2.zero)
-                {
-                    float targetRotation = Mathf.Atan2(moveDirection.x, moveDirection.y) * Mathf.Rad2Deg;
-                    float newRotation = Mathf.LerpAngle(rb.rotation, targetRotation, 
-                        Time.fixedDeltaTime * rotationSpeed);
-                    rb.MoveRotation(newRotation);
-                }
+                float targetRotation = Mathf.Atan2(moveDirection.x, moveDirection.y) * Mathf.Rad2Deg;
+                float newRotation = Mathf.LerpAngle(rb.rotation, targetRotation, 
+                    Time.fixedDeltaTime * rotationSpeed);
+                rb.MoveRotation(newRotation);
             }
-            else if (!isMoving && rb.linearVelocity.magnitude > 0.1f)
+            else
             {
-                // Apply deceleration when not moving
-                rb.linearVelocity = Vector2.Lerp(rb.linearVelocity, Vector2.zero, 
-                    Time.fixedDeltaTime / decelerationTime);
+                // Apply deceleration when not moving (inertia effect)
+                if (rb.linearVelocity.magnitude > 0.01f)
+                {
+                    rb.linearVelocity = Vector2.Lerp(rb.linearVelocity, Vector2.zero, 
+                        Time.fixedDeltaTime / decelerationTime);
+                }
+                else
+                {
+                    // Stop completely when velocity is very small
+                    rb.linearVelocity = Vector2.zero;
+                }
             }
         }
 
         // Called by input system
         public void Move(Vector2 direction)
         {
+            Vector2 previousDirection = moveDirection;
+            bool wasMoving = isMoving;
+            
             moveDirection = Vector2.ClampMagnitude(direction, 1f);
             isMoving = moveDirection != Vector2.zero;
             
-            Debug.Log($"ThoughtBoatSailingController: Move called - Direction={moveDirection}, IsMoving={isMoving}");
+            // Log state changes
+            if (wasMoving != isMoving)
+            {
+                if (isMoving)
+                {
+                    Debug.Log($"ThoughtBoatSailingController: Started moving - Direction={moveDirection}");
+                }
+                else
+                {
+                    Debug.Log("ThoughtBoatSailingController: Stopped input - Boat will decelerate with inertia");
+                }
+            }
+            else if (isMoving && Vector2.Distance(previousDirection, moveDirection) > 0.1f)
+            {
+                Debug.Log($"ThoughtBoatSailingController: Direction changed - New direction={moveDirection}");
+            }
         }
 
         public void Stop()

@@ -37,6 +37,9 @@ namespace BecomeSisyphus.Managers.Systems
             currentMentalStrength = maxMentalStrength;
             lastActionTime = 0f;
             InitializeAbilities();
+            
+            // Trigger initial event to notify UI components
+            OnMentalStrengthChanged?.Invoke(currentMentalStrength);
         }
 
         private void InitializeAbilities()

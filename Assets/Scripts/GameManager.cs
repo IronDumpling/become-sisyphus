@@ -125,6 +125,17 @@ namespace BecomeSisyphus
             // Debug.LogError($"GameManager: Available systems: {string.Join(", ", systems.Keys.Select(k => k.Name))}");
             return default;
         }
+        
+        // Debug method to list all registered systems
+        [ContextMenu("List All Systems")]
+        public void ListAllSystems()
+        {
+            Debug.Log($"GameManager: Total registered systems: {systems.Count}");
+            foreach (var kvp in systems)
+            {
+                Debug.Log($"  - {kvp.Key.Name}: {kvp.Value}");
+            }
+        }
 
         private void Update()
         {

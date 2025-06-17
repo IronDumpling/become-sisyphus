@@ -34,7 +34,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 179.6, y: 0}
+  m_AnchoredPosition: {x: 200, y: 0}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2671533140846606566
@@ -196,6 +196,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6208779969817794591}
+  - component: {fileID: 1781799398904772792}
   m_Layer: 5
   m_Name: ProgressBar
   m_TagString: Untagged
@@ -222,8 +223,32 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 5, y: -5}
-  m_SizeDelta: {x: 2, y: 50}
+  m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0, y: 1}
+--- !u!114 &1781799398904772792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5586895628065053426}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 328a4532bc5a8eb429060bbbf1dc2e1a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  valueImage: {fileID: 1295601914680529404}
+  titleText: {fileID: 5521327219724438043}
+  useManagerSystem: 1
+  showNumericValue: 1
+  titlePrefix: Mind
+  animationSpeed: 2
+  smoothTransition: 1
+  normalColor: {r: 0.43921572, g: 0.78823537, b: 1, a: 1}
+  lowColor: {r: 0.3987607, g: 0.22027412, b: 0.6226415, a: 1}
+  criticalColor: {r: 0.6132076, g: 0.17644179, b: 0.23884833, a: 1}
+  lowThreshold: 0.3
+  criticalThreshold: 0.1
 --- !u!1 &9008192928234827734
 GameObject:
   m_ObjectHideFlags: 0
@@ -258,8 +283,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 40, y: 0}
-  m_SizeDelta: {x: 80, y: 50}
+  m_AnchoredPosition: {x: 50, y: 0}
+  m_SizeDelta: {x: 100, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8586271937029845049
 CanvasRenderer:

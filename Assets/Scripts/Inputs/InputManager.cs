@@ -208,7 +208,6 @@ namespace BecomeSisyphus.Inputs
             // Store move command for dynamic updates (separate instance for sailing)
             sailingMoveBoatCommand = new MoveBoatCommand(thoughtBoatSailingController, Vector2.zero);
             RegisterCommand("MoveBoat", sailingMoveBoatCommand);
-            RegisterCommand("StopBoat", new StopBoatCommand(thoughtBoatSailingController));
             RegisterCommand("EnterOutsideWorld", new EnterOutsideWorldFromInsideCommand());
 
             // Use unified OpenInteractionCommand with specific interaction types
@@ -360,7 +359,24 @@ namespace BecomeSisyphus.Inputs
         private void OnActionCanceled(InputAction.CallbackContext context)
         {
             Debug.Log($"InputManager: Action canceled: {context.action.name}");
-            // Handle action canceled if needed
+            
+            // Handle MoveBoat action cancellation (when player releases WASD)
+            if (context.action.name == "MoveBoat")
+            {
+                // Send zero direction to stop the boat
+                if (currentActionMap?.name == "InsideWorld" && moveBoatCommand != null)
+                {
+                    moveBoatCommand.UpdateDirection(Vector2.zero);
+                    moveBoatCommand.Execute();
+                }
+                else if (currentActionMap?.name == "BoatSailing" && sailingMoveBoatCommand != null)
+                {
+                    sailingMoveBoatCommand.UpdateDirection(Vector2.zero);
+                    sailingMoveBoatCommand.Execute();
+                }
+                
+                Debug.Log("InputManager: MoveBoat action canceled, stopping boat");
+            }
         }
         
         private void OnActionStarted(InputAction.CallbackContext context)

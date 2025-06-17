@@ -46,10 +46,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d26a63d712ad6e04599b2d050bd99fbe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 10
   rotationSpeed: 100
-  accelerationTime: 0.2
-  decelerationTime: 0.1
+  accelerationTime: 1
+  decelerationTime: 0.5
   movementMentalCost: 0.5
   mentalCostInterval: 1
 --- !u!114 &3771634534058782927

@@ -91,6 +91,10 @@ namespace BecomeSisyphus.Inputs.Commands
         }
     }
 
+    /// <summary>
+    /// [DEPRECATED] This command is no longer needed as boat stopping is now handled automatically
+    /// when input is released through InputManager.OnActionCanceled
+    /// </summary>
     public class StopBoatCommand : ICommand
     {
         private readonly ThoughtBoatSailingController controller;
