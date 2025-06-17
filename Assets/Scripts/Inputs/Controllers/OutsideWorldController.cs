@@ -16,5 +16,17 @@ namespace BecomeSisyphus.Inputs.Controllers
             Debug.Log("Using perception skill in Outside World.");
             // TODO: Implement perception skill logic
         }
+
+        public void StartClimbing()
+        {
+            Debug.Log("OutsideWorldController: Starting climbing");
+            // This will be handled by the command system
+        }
+
+        public void EnterInsideWorld()
+        {
+            Debug.Log("OutsideWorldController: Entering inside world");
+            // This will be handled by the command system
+        }
     }
 } 

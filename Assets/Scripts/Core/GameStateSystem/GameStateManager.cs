@@ -15,8 +15,25 @@ namespace BecomeSisyphus.Core.GameStateSystem
         private Dictionary<string, IGameState> rootStates = new Dictionary<string, IGameState>();
         private IGameState currentRootState;
         
+        // State memory for proper transitions
+        private string lastOutsideWorldState = "MountainFoot"; // Default to MountainFoot
+        private string lastInsideWorldState = "Resting"; // Default to Resting (Harbor/Lighthouse rest)
+        
         public IGameState CurrentRootState => currentRootState;
         public IGameState CurrentActiveState => currentRootState?.GetActiveLeafState();
+        
+        // Properties for state memory
+        public string LastOutsideWorldState 
+        { 
+            get => lastOutsideWorldState; 
+            set => lastOutsideWorldState = value; 
+        }
+        
+        public string LastInsideWorldState 
+        { 
+            get => lastInsideWorldState; 
+            set => lastInsideWorldState = value; 
+        }
         
         // 事件
         public event Action<IGameState> OnStateEntered;
@@ -210,6 +227,9 @@ namespace BecomeSisyphus.Core.GameStateSystem
         /// </summary>
         private void NotifySystemsOfStateChange(IGameState newState)
         {
+            // Update state memory based on current state
+            UpdateStateMemory(newState);
+            
             // 通知InputManager切换Action Map
             if (BecomeSisyphus.Inputs.InputManager.Instance != null)
             {
@@ -232,6 +252,65 @@ namespace BecomeSisyphus.Core.GameStateSystem
         }
 
         /// <summary>
+        /// Update state memory when transitioning between states
+        /// </summary>
+        private void UpdateStateMemory(IGameState newState)
+        {
+            var statePath = newState.GetFullStatePath();
+            
+            if (statePath.Contains("OutsideWorld"))
+            {
+                // Extract the specific outside world state
+                if (statePath.Contains("MountainFoot"))
+                    lastOutsideWorldState = "MountainFoot";
+                else if (statePath.Contains("Climbing"))
+                    lastOutsideWorldState = "Climbing";
+                else if (statePath.Contains("Perception"))
+                    lastOutsideWorldState = "Perception";
+                else if (statePath.Contains("MountainTop"))
+                    lastOutsideWorldState = "MountainTop";
+            }
+            else if (statePath.Contains("InsideWorld"))
+            {
+                // Extract the specific inside world state
+                if (statePath.Contains("Sailing"))
+                    lastInsideWorldState = "Sailing";
+                else if (statePath.Contains("Resting") || statePath.Contains("Harbour") || statePath.Contains("Lighthouse"))
+                    lastInsideWorldState = "Resting";
+                else if (statePath.Contains("Interaction"))
+                    lastInsideWorldState = "Interaction";
+                else if (statePath.Contains("ThoughtBoatCabin"))
+                    lastInsideWorldState = "ThoughtBoatCabin";
+                else if (statePath.Contains("Telescope"))
+                    lastInsideWorldState = "Telescope";
+            }
+        }
+
+        /// <summary>
+        /// Switch to the last remembered outside world state
+        /// </summary>
+        public void SwitchToLastOutsideWorldState()
+        {
+            SwitchToState($"InsideGame/OutsideWorld/{lastOutsideWorldState}");
+        }
+
+        /// <summary>
+        /// Switch to the last remembered inside world state
+        /// </summary>
+        public void SwitchToLastInsideWorldState()
+        {
+            if (lastInsideWorldState == "Resting")
+            {
+                // Default to Harbour rest for Resting state
+                SwitchToState("InsideGame/InsideWorld/Interaction/Harbour");
+            }
+            else
+            {
+                SwitchToState($"InsideGame/InsideWorld/{lastInsideWorldState}");
+            }
+        }
+
+        /// <summary>
         /// 根据状态确定对应的Action Map
         /// </summary>
         private string DetermineActionMapForState(IGameState state)
@@ -242,16 +321,16 @@ namespace BecomeSisyphus.Core.GameStateSystem
                 return "MainTitle";
             else if (statePath.Contains("OutsideWorld"))
                 return "OutsideWorld";
-            else if (statePath.Contains("Sailing"))
+            else if (statePath.Contains("InsideWorld"))
                 return "InsideWorld";
+            else if (statePath.Contains("Sailing"))
+                return "BoatSailing";
             else if (statePath.Contains("Interaction"))
                 return "BoatInteraction";
             else if (statePath.Contains("ThoughtVessel"))
                 return "ThoughtVessel";
             else if (statePath.Contains("Telescope"))
                 return "Telescope";
-            else if (statePath.Contains("InsideWorld"))
-                return "InsideWorld";
                 
             return null;
         }

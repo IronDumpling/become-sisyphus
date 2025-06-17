@@ -56,4 +56,75 @@ namespace BecomeSisyphus.Inputs.Commands
             Debug.Log("Using Perception Skill and switching to Outside World");
         }
     }
+
+    /// <summary>
+    /// 开始航行命令 (Resting -> Sailing)
+    /// </summary>
+    public class StartSailingCommand : ICommand
+    {
+        public void Execute()
+        {
+            Debug.Log("StartSailingCommand: Executing start sailing");
+            
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                var currentState = stateManager.CurrentActiveState;
+                if (currentState is HarbourInteractionState harbourState)
+                {
+                    harbourState.StartSailing();
+                }
+                else if (currentState is LighthouseInteractionState lighthouseState)
+                {
+                    // If we add StartSailing to lighthouse state as well
+                    Debug.Log("StartSailingCommand: Starting sailing from lighthouse");
+                    var insideWorldState = stateManager.CurrentRootState?.SubStates["InsideWorld"];
+                    insideWorldState?.SwitchToSubState("Sailing");
+                }
+                else
+                {
+                    Debug.LogWarning($"StartSailingCommand: Cannot execute from current state: {currentState?.StateName}");
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 进入外部世界命令 (从任何InsideWorld状态)
+    /// </summary>
+    public class EnterOutsideWorldFromInsideCommand : ICommand
+    {
+        public void Execute()
+        {
+            Debug.Log("EnterOutsideWorldFromInsideCommand: Executing enter outside world");
+            
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                var currentState = stateManager.CurrentActiveState;
+                var statePath = currentState?.GetFullStatePath();
+                
+                if (statePath != null && statePath.Contains("InsideWorld"))
+                {
+                    if (currentState is HarbourInteractionState harbourState)
+                    {
+                        harbourState.EnterOutsideWorld();
+                    }
+                    else if (currentState is SailingState sailingState)
+                    {
+                        sailingState.EnterOutsideWorld();
+                    }
+                    else
+                    {
+                        // Fallback for other inside world states
+                        stateManager.SwitchToLastOutsideWorldState();
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"EnterOutsideWorldFromInsideCommand: Cannot execute from current state: {currentState?.StateName}");
+                }
+            }
+        }
+    }
 } 

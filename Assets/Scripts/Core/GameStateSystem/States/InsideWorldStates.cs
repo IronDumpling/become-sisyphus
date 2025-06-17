@@ -17,9 +17,17 @@ namespace BecomeSisyphus.Core.GameStateSystem
             
             Debug.Log("InsideWorldState: Entering inside world");
             
-            // 默认进入Sailing状态
-            if (CurrentSubState == null)
+            // Check if we should enter resting state or another state
+            var gameStateManager = GameStateManager.Instance;
+            if (gameStateManager != null && gameStateManager.LastInsideWorldState == "Resting")
             {
+                // Default to Harbour rest for Resting state
+                SwitchToSubState("Interaction");
+                CurrentSubState?.SwitchToSubState("Harbour");
+            }
+            else if (CurrentSubState == null)
+            {
+                // Default to Sailing if no specific state requested
                 SwitchToSubState("Sailing");
             }
         }
@@ -50,8 +58,7 @@ namespace BecomeSisyphus.Core.GameStateSystem
         /// </summary>
         public void ReturnToOutsideWorld()
         {
-            var insideGameState = ParentState as InsideGameState;
-            insideGameState?.SwitchToOutsideWorld();
+            GameStateManager.Instance?.SwitchToLastOutsideWorldState();
         }
     }
 
@@ -68,11 +75,13 @@ namespace BecomeSisyphus.Core.GameStateSystem
         {
             base.OnEnter(previousState);
             Debug.Log("SailingState: Sailing in the mind ocean");
+            Debug.Log("SailingState: Use WASD to move boat, Press Space to go to outside world");
             
             // 航行状态逻辑
-            // - 启用自由航行
+            // - 启用自由航行 WASD移动小船
             // - 时间推进
             // - 显示航行界面
+            // - Space键进入外部世界
         }
 
         public override void OnExit(IGameState nextState)
@@ -89,6 +98,27 @@ namespace BecomeSisyphus.Core.GameStateSystem
             // - 处理船只移动
             // - 检测交互点
             // - 更新时间系统
+        }
+
+        /// <summary>
+        /// 移动小船 (通过WASD键触发)
+        /// </summary>
+        public void MoveBoat(Vector2 direction)
+        {
+            if (direction != Vector2.zero)
+            {
+                Debug.Log($"SailingState: Moving boat in direction: {direction}");
+                // 实际的船只移动逻辑
+            }
+        }
+
+        /// <summary>
+        /// 进入外部世界 (通过Space键触发)
+        /// </summary>
+        public void EnterOutsideWorld()
+        {
+            Debug.Log("SailingState: Entering outside world");
+            GameStateManager.Instance?.SwitchToLastOutsideWorldState();
         }
 
         /// <summary>
@@ -232,7 +262,39 @@ namespace BecomeSisyphus.Core.GameStateSystem
         public override void OnEnter(IGameState previousState)
         {
             base.OnEnter(previousState);
-            Debug.Log("HarbourInteractionState: Interacting with harbour");
+            Debug.Log("HarbourInteractionState: Resting at harbour");
+            Debug.Log("HarbourInteractionState: Press Esc to start sailing, Press Space to go to outside world");
+            
+            // This acts as the "Resting" state
+            // - Boat is docked at harbour
+            // - Player can rest here
+            // - Press Esc to start sailing
+            // - Press Space to go to outside world
+        }
+
+        public override void OnExit(IGameState nextState)
+        {
+            base.OnExit(nextState);
+            Debug.Log("HarbourInteractionState: Leaving harbour");
+        }
+
+        /// <summary>
+        /// 开始航行 (通过Esc键触发)
+        /// </summary>
+        public void StartSailing()
+        {
+            Debug.Log("HarbourInteractionState: Starting to sail");
+            // Go up two levels: Harbour -> Interaction -> InsideWorld, then switch to Sailing
+            ParentState?.ParentState?.SwitchToSubState("Sailing");
+        }
+
+        /// <summary>
+        /// 进入外部世界 (通过Space键触发)
+        /// </summary>
+        public void EnterOutsideWorld()
+        {
+            Debug.Log("HarbourInteractionState: Entering outside world");
+            GameStateManager.Instance?.SwitchToLastOutsideWorldState();
         }
 
         /// <summary>

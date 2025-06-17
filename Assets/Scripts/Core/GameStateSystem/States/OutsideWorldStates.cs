@@ -59,10 +59,12 @@ namespace BecomeSisyphus.Core.GameStateSystem
         {
             base.OnEnter(previousState);
             Debug.Log("MountainFootState: At the foot of the mountain");
+            Debug.Log("MountainFootState: Press Enter to start climbing");
             
             // 山脚状态逻辑
             // - 显示山脚场景
             // - 准备爬山
+            // - 只允许Enter键进入爬山状态
         }
 
         public override void OnExit(IGameState nextState)
@@ -72,10 +74,11 @@ namespace BecomeSisyphus.Core.GameStateSystem
         }
 
         /// <summary>
-        /// 开始爬山
+        /// 开始爬山 (只能通过Enter键触发)
         /// </summary>
         public void StartClimbing()
         {
+            Debug.Log("MountainFootState: Starting to climb the mountain");
             ParentState?.SwitchToSubState("Climbing");
         }
     }
@@ -93,11 +96,13 @@ namespace BecomeSisyphus.Core.GameStateSystem
         {
             base.OnEnter(previousState);
             Debug.Log("ClimbingState: Climbing the mountain");
+            Debug.Log("ClimbingState: Press Space to enter inside world");
             
             // 爬山状态逻辑
             // - 显示爬山界面
             // - 启动爬山机制
             // - 时间推进
+            // - 只允许Space键进入内部世界
         }
 
         public override void OnExit(IGameState nextState)
@@ -136,8 +141,8 @@ namespace BecomeSisyphus.Core.GameStateSystem
         /// </summary>
         public void EnterInsideWorld()
         {
-            var insideGameState = ParentState?.ParentState as InsideGameState;
-            insideGameState?.SwitchToInsideWorld();
+            Debug.Log("ClimbingState: Entering inside world");
+            GameStateManager.Instance?.SwitchToLastInsideWorldState();
         }
     }
 
