@@ -50,6 +50,17 @@ namespace BecomeSisyphus.Inputs.Commands
             Debug.Log("SwitchToInsideWorldCommand: Calling SwitchToInsideWorld...");
             cameraSystem.SwitchToInsideWorld();
             
+            // Switch to inside world input action map
+            Debug.Log("SwitchToInsideWorldCommand: Switching input action map to InsideWorld...");
+            if (BecomeSisyphus.Inputs.InputManager.Instance != null)
+            {
+                BecomeSisyphus.Inputs.InputManager.Instance.SwitchActionMap("InsideWorld");
+            }
+            else
+            {
+                Debug.LogError("SwitchToInsideWorldCommand: InputManager.Instance is null!");
+            }
+            
             Debug.Log("SwitchToInsideWorldCommand: Execution completed - Switched to Inside World (Sailing State)");
         }
     }

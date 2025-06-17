@@ -56,71 +56,56 @@ namespace BecomeSisyphus
 
         private void InitializeSystems()
         {
-            try
+            if (config == null)
             {
-                if (config == null)
-                {
-                    Debug.LogError("GameManager: GameConfiguration is not set in inspector!");
-                    return;
-                }
-
-                // 基础系统先初始化
-                RegisterSystem(new TimeSystem(config.timeScale, config.dayLength));
-                // RegisterSystem(new CameraSystem());
-                
-                // 核心游戏系统
-                RegisterSystem(new SisyphusManager(
-                    config.managerMentalStrength, 
-                    config.managerMaxBrainCapacity, 
-                    config.managerMentalStrengthRegenRate
-                ));
-                RegisterSystem(new SisyphusMindSystem(
-                    config.maxMentalStrength, 
-                    config.mentalStrengthRegenRate, 
-                    config.mentalStrengthRegenDelay
-                ));
-                
-                // 游戏机制系统
-                RegisterSystem(new ConfusionSystem(
-                    config.confusionGenerationInterval, 
-                    config.temporaryConfusionDuration
-                ));
-                RegisterSystem(new ThoughtVesselSystem(
-                    config.initialRows, 
-                    config.initialColumns, 
-                    config.loadRatioThreshold, 
-                    config.mentalStrengthConsumptionRate
-                ));
-                
-                // 辅助系统
-                RegisterSystem(new MemorySystem());
-                RegisterSystem(new ExplorationSystem());
-                RegisterSystem(new MindOceanSystem());
-                RegisterSystem(new SignifierSystem());
-
-                Debug.Log("GameManager: All systems initialized successfully");
+                Debug.LogError("GameManager: GameConfiguration is not set in inspector!");
+                return;
             }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"GameManager: Failed to initialize systems: {e.Message}");
-            }
+
+            // 基础系统先初始化
+            RegisterSystem(new TimeSystem(config.timeScale, config.dayLength));
+            RegisterSystem(new CameraSystem());
+            
+            // 核心游戏系统
+            RegisterSystem(new SisyphusManager(
+                config.managerMentalStrength, 
+                config.managerMaxBrainCapacity, 
+                config.managerMentalStrengthRegenRate
+            ));
+            RegisterSystem(new SisyphusMindSystem(
+                config.maxMentalStrength, 
+                config.mentalStrengthRegenRate, 
+                config.mentalStrengthRegenDelay
+            ));
+            
+            // 游戏机制系统
+            RegisterSystem(new ConfusionSystem(
+                config.confusionGenerationInterval, 
+                config.temporaryConfusionDuration
+            ));
+            RegisterSystem(new ThoughtVesselSystem(
+                config.initialRows, 
+                config.initialColumns, 
+                config.loadRatioThreshold, 
+                config.mentalStrengthConsumptionRate
+            ));
+            
+            // 辅助系统
+            RegisterSystem(new MemorySystem());
+            RegisterSystem(new ExplorationSystem());
+            RegisterSystem(new MindOceanSystem());
+            RegisterSystem(new SignifierSystem());
+
+            Debug.Log("GameManager: All systems initialized successfully");
         }
 
         private void RegisterSystem(ISystem system)
         {
-            try
-            {
-                Debug.Log($"GameManager: Registering system: {system.GetType().Name}");
-                systems[system.GetType()] = system;
-                Debug.Log($"GameManager: Initializing system: {system.GetType().Name}");
-                system.Initialize();
-                Debug.Log($"GameManager: System {system.GetType().Name} registered and initialized successfully");
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"GameManager: Failed to register system {system.GetType().Name}: {e.Message}");
-                throw; // 重新抛出异常以便上层处理
-            }
+            Debug.Log($"GameManager: Registering system: {system.GetType().Name}");
+            systems[system.GetType()] = system;
+            Debug.Log($"GameManager: Initializing system: {system.GetType().Name}");
+            system.Initialize();
+            Debug.Log($"GameManager: System {system.GetType().Name} registered and initialized successfully");
         }
 
         public T GetSystem<T>() where T : ISystem

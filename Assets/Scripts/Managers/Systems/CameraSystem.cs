@@ -22,6 +22,8 @@ namespace BecomeSisyphus.Managers.Systems
             if (!ValidateSystemState()) return;
 
             Debug.Log($"CameraSystem: Current game state: {GameManager.Instance.CurrentState}");
+            Debug.Log($"CameraSystem: GameState enum values - Climbing: {(int)GameState.Climbing}, Sailing: {(int)GameState.Sailing}");
+            Debug.Log($"CameraSystem: Current state as int: {(int)GameManager.Instance.CurrentState}");
             
             // Set initial camera based on game state
             switch (GameManager.Instance.CurrentState)
@@ -29,18 +31,32 @@ namespace BecomeSisyphus.Managers.Systems
                 case GameState.Climbing:
                     Debug.Log("CameraSystem: Setting initial camera to OutsideWorldCamera");
                     currentCamera = behaviour.OutsideWorldCamera;
+                    Debug.Log($"CameraSystem: currentCamera set to: {currentCamera != null}");
                     behaviour.OutsideWorldCamera.Priority.Value = behaviour.ActivePriority;
+                    Debug.Log($"CameraSystem: OutsideWorldCamera priority set to: {behaviour.OutsideWorldCamera.Priority.Value}");
                     break;
                 case GameState.Sailing:
                     Debug.Log("CameraSystem: Setting initial camera to InsideWorldCamera");
                     currentCamera = behaviour.InsideWorldCamera;
+                    Debug.Log($"CameraSystem: currentCamera set to: {currentCamera != null}");
                     behaviour.InsideWorldCamera.Priority.Value = behaviour.ActivePriority;
+                    Debug.Log($"CameraSystem: InsideWorldCamera priority set to: {behaviour.InsideWorldCamera.Priority.Value}");
                     break;
+                case GameState.MainMenu:
                 default:
-                    Debug.LogWarning($"CameraSystem: Unknown game state: {GameManager.Instance.CurrentState}");
+                    Debug.LogWarning($"CameraSystem: Game state is {GameManager.Instance.CurrentState}, defaulting to OutsideWorldCamera");
+                    currentCamera = behaviour.OutsideWorldCamera;
+                    Debug.Log($"CameraSystem: currentCamera set to default: {currentCamera != null}");
+                    behaviour.OutsideWorldCamera.Priority.Value = behaviour.ActivePriority;
+                    Debug.Log($"CameraSystem: OutsideWorldCamera priority set to: {behaviour.OutsideWorldCamera.Priority.Value}");
                     break;
             }
             
+            Debug.Log($"CameraSystem: Final currentCamera state: {currentCamera != null}");
+            if (currentCamera != null)
+            {
+                Debug.Log($"CameraSystem: Current camera name: {currentCamera.name}");
+            }
             Debug.Log("CameraSystem: Initialization completed");
         }
 
@@ -119,9 +135,13 @@ namespace BecomeSisyphus.Managers.Systems
 
         private IEnumerator TransitionToCamera(CinemachineCamera targetCamera)
         {
+            Debug.Log($"CameraSystem: TransitionToCamera called - Target: {targetCamera?.name}, Current: {currentCamera?.name}");
+            
             if (targetCamera == null || currentCamera == null)
             {
-                Debug.LogError($"Target camera or current camera is null! Target: {targetCamera != null}, Current: {currentCamera != null}");
+                Debug.LogError($"CameraSystem: Target camera or current camera is null! Target: {targetCamera != null}, Current: {currentCamera != null}");
+                Debug.LogError($"CameraSystem: This usually means the initialization didn't set currentCamera properly.");
+                Debug.LogError($"CameraSystem: Current GameState during transition: {GameManager.Instance.CurrentState}");
                 yield break;
             }
 

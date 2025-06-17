@@ -34,6 +34,17 @@ namespace BecomeSisyphus.Inputs.Commands
             Debug.Log("SwitchToOutsideWorldCommand: Calling SwitchToOutsideWorld...");
             cameraSystem.SwitchToOutsideWorld();
             
+            // Switch back to outside world input action map
+            Debug.Log("SwitchToOutsideWorldCommand: Switching input action map to OutsideWorld...");
+            if (BecomeSisyphus.Inputs.InputManager.Instance != null)
+            {
+                BecomeSisyphus.Inputs.InputManager.Instance.SwitchActionMap("OutsideWorld");
+            }
+            else
+            {
+                Debug.LogError("SwitchToOutsideWorldCommand: InputManager.Instance is null!");
+            }
+            
             Debug.Log("SwitchToOutsideWorldCommand: Execution completed - Switched to Outside World (Climbing State)");
         }
     }
