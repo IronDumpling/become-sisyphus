@@ -15,13 +15,6 @@ namespace BecomeSisyphus.Inputs
 
         [SerializeField] private InputActionAsset inputActions;
 
-        [Header("Controller Settings")]
-        [SerializeField] private bool createOutsideWorldController = true;
-        [SerializeField] private bool createThoughtBoatSailingController = true;
-        [SerializeField] private bool createThoughtBoatInteractionController = true;
-        [SerializeField] private bool createThoughtVesselController = true;
-        [SerializeField] private bool createTelescopeController = true;
-
         private InputActionMap currentActionMap;
         private Dictionary<string, ICommand> commandMap = new Dictionary<string, ICommand>();
 
@@ -42,7 +35,6 @@ namespace BecomeSisyphus.Inputs
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
-                CreateControllers();
                 InitializeInputActions();
             }
             else
@@ -51,51 +43,22 @@ namespace BecomeSisyphus.Inputs
             }
         }
 
-        private void CreateControllers()
+        // New method: Find and set active controllers when needed
+        public void SetActiveControllers()
         {
-            if (createOutsideWorldController)
-            {
-                var controllerObj = new GameObject("OutsideWorldController");
-                controllerObj.transform.SetParent(transform);
-                outsideWorldController = controllerObj.AddComponent<OutsideWorldController>();
-            }
+            // Find controllers in current scene
+            thoughtBoatSailingController = FindAnyObjectByType<ThoughtBoatSailingController>();
+            thoughtBoatInteractionController = FindAnyObjectByType<ThoughtBoatInteractionController>();
+            thoughtVesselController = FindAnyObjectByType<ThoughtVesselController>();
+            telescopeController = FindAnyObjectByType<TelescopeController>();
+            outsideWorldController = FindAnyObjectByType<OutsideWorldController>();
 
-            if (createThoughtBoatSailingController)
-            {
-                var controllerObj = new GameObject("ThoughtBoatSailingController");
-                controllerObj.transform.SetParent(transform);
-                thoughtBoatSailingController = controllerObj.AddComponent<ThoughtBoatSailingController>();
-            }
-
-            if (createThoughtBoatInteractionController)
-            {
-                var controllerObj = new GameObject("ThoughtBoatInteractionController");
-                controllerObj.transform.SetParent(transform);
-                thoughtBoatInteractionController = controllerObj.AddComponent<ThoughtBoatInteractionController>();
-            }
-
-            if (createThoughtVesselController)
-            {
-                var controllerObj = new GameObject("ThoughtVesselController");
-                controllerObj.transform.SetParent(transform);
-                thoughtVesselController = controllerObj.AddComponent<ThoughtVesselController>();
-            }
-
-            if (createTelescopeController)
-            {
-                var controllerObj = new GameObject("TelescopeController");
-                controllerObj.transform.SetParent(transform);
-                telescopeController = controllerObj.AddComponent<TelescopeController>();
-            }
-        }
-
-        private void ValidateControllers()
-        {
-            if (outsideWorldController == null && createOutsideWorldController) Debug.LogWarning("OutsideWorldController not created!");
-            if (thoughtBoatSailingController == null && createThoughtBoatSailingController) Debug.LogWarning("ThoughtBoatSailingController not created!");
-            if (thoughtBoatInteractionController == null && createThoughtBoatInteractionController) Debug.LogWarning("ThoughtBoatInteractionController not created!");
-            if (thoughtVesselController == null && createThoughtVesselController) Debug.LogWarning("ThoughtVesselController not created!");
-            if (telescopeController == null && createTelescopeController) Debug.LogWarning("TelescopeController not created!");
+            Debug.Log($"InputManager: SetActiveControllers - Found controllers: " +
+                     $"ThoughtBoatSailing={thoughtBoatSailingController != null}, " +
+                     $"ThoughtBoatInteraction={thoughtBoatInteractionController != null}, " +
+                     $"ThoughtVessel={thoughtVesselController != null}, " +
+                     $"Telescope={telescopeController != null}, " +
+                     $"OutsideWorld={outsideWorldController != null}");
         }
 
         private void InitializeInputActions()
@@ -130,6 +93,9 @@ namespace BecomeSisyphus.Inputs
         public void SwitchActionMap(string actionMapName)
         {
             Debug.Log($"InputManager: Attempting to switch to action map: {actionMapName}");
+            
+            // Update controller references when switching action maps
+            SetActiveControllers();
             
             if (currentActionMap != null)
             {

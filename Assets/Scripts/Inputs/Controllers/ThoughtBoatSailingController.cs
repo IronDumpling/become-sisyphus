@@ -11,13 +11,26 @@ namespace BecomeSisyphus.Inputs.Controllers
         [Header("Movement Settings")]
         [SerializeField] private float moveSpeed = 5f;
         [SerializeField] private float rotationSpeed = 100f;
+        [SerializeField] private float accelerationTime = 0.2f;
+        [SerializeField] private float decelerationTime = 0.1f;
 
+        // References
+        private Rigidbody2D rb;
+        private SisyphusMindSystem mindSystem;
+        private ThoughtBoatSystem boatSystem;
         private MindOceanSystem mindOceanSystem;
         private ExplorationSystem explorationSystem;
         private VesselSystem vesselSystem;
         
         private Vector2 currentVelocity;
         private float currentRotation;
+        private Vector2 moveDirection;
+        private bool isMoving;
+
+        [Header("Mental Cost")]
+        [SerializeField] private float movementMentalCost = 0.5f;
+        [SerializeField] private float mentalCostInterval = 1f;
+        private float lastMentalCostTime;
 
         public enum InteractionType
         {
@@ -32,37 +45,106 @@ namespace BecomeSisyphus.Inputs.Controllers
 
         private void Awake()
         {
-            mindOceanSystem = GameManager.Instance.GetSystem<MindOceanSystem>();
-            explorationSystem = GameManager.Instance.GetSystem<ExplorationSystem>();
-            vesselSystem = GameManager.Instance.GetSystem<VesselSystem>();
-        }
-
-        // Movement functionality
-        public void Move(Vector2 direction)
-        {
-            // Normalize direction to ensure consistent movement speed
-            direction = Vector2.ClampMagnitude(direction, 1f);
-            
-            // Update velocity with smooth damping
-            currentVelocity = Vector2.Lerp(currentVelocity, direction * moveSpeed, Time.deltaTime * 5f);
-            
-            // Apply movement
-            transform.position += new Vector3(currentVelocity.x, 0, currentVelocity.y) * Time.deltaTime;
-
-            // Handle rotation
-            if (direction != Vector2.zero)
+            // Setup Rigidbody2D for physics-based movement
+            rb = GetComponent<Rigidbody2D>();
+            if (rb == null)
             {
-                float targetRotation = Mathf.Atan2(direction.x, direction.y) * Mathf.Rad2Deg;
-                currentRotation = Mathf.LerpAngle(currentRotation, targetRotation, Time.deltaTime * rotationSpeed);
-                transform.rotation = Quaternion.Euler(0, currentRotation, 0);
+                rb = gameObject.AddComponent<Rigidbody2D>();
+                rb.bodyType = RigidbodyType2D.Dynamic;
+                rb.gravityScale = 0f;
+                rb.linearDamping = 0.5f;
+                rb.angularDamping = 0.5f;
+                rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+                Debug.Log("ThoughtBoatSailingController: Added Rigidbody2D component");
             }
 
-            Debug.Log($"Boat moving: Direction={direction}, Velocity={currentVelocity}, Rotation={currentRotation}");
+            // Get system references
+            if (GameManager.Instance != null)
+            {
+                mindSystem = GameManager.Instance.GetSystem<SisyphusMindSystem>();
+                boatSystem = GameManager.Instance.GetSystem<ThoughtBoatSystem>();
+                mindOceanSystem = GameManager.Instance.GetSystem<MindOceanSystem>();
+                explorationSystem = GameManager.Instance.GetSystem<ExplorationSystem>();
+                vesselSystem = GameManager.Instance.GetSystem<VesselSystem>();
+            }
+            else
+            {
+                Debug.LogWarning("ThoughtBoatSailingController: GameManager.Instance is null in Awake");
+            }
+        }
+
+        private void Start()
+        {
+            // Register to ThoughtBoatSystem
+            if (boatSystem != null)
+            {
+                boatSystem.RegisterActiveBoat(this);
+                Debug.Log("ThoughtBoatSailingController: Registered to ThoughtBoatSystem");
+            }
+            else
+            {
+                Debug.LogWarning("ThoughtBoatSailingController: boatSystem is null, cannot register");
+            }
+        }
+
+        private void FixedUpdate()
+        {
+            if (isMoving && moveDirection != Vector2.zero)
+            {
+                // Apply mental cost at intervals while moving
+                if (Time.time - lastMentalCostTime >= mentalCostInterval)
+                {
+                    ApplyMentalCost();
+                    lastMentalCostTime = Time.time;
+                }
+
+                // Calculate target velocity
+                Vector2 targetVelocity = moveDirection * moveSpeed;
+                
+                // Smoothly interpolate current velocity
+                rb.linearVelocity = Vector2.Lerp(rb.linearVelocity, targetVelocity, 
+                    Time.fixedDeltaTime / (isMoving ? accelerationTime : decelerationTime));
+
+                // Handle rotation
+                if (moveDirection != Vector2.zero)
+                {
+                    float targetRotation = Mathf.Atan2(moveDirection.x, moveDirection.y) * Mathf.Rad2Deg;
+                    float newRotation = Mathf.LerpAngle(rb.rotation, targetRotation, 
+                        Time.fixedDeltaTime * rotationSpeed);
+                    rb.MoveRotation(newRotation);
+                }
+            }
+            else if (!isMoving && rb.linearVelocity.magnitude > 0.1f)
+            {
+                // Apply deceleration when not moving
+                rb.linearVelocity = Vector2.Lerp(rb.linearVelocity, Vector2.zero, 
+                    Time.fixedDeltaTime / decelerationTime);
+            }
+        }
+
+        // Called by input system
+        public void Move(Vector2 direction)
+        {
+            moveDirection = Vector2.ClampMagnitude(direction, 1f);
+            isMoving = moveDirection != Vector2.zero;
+            
+            Debug.Log($"ThoughtBoatSailingController: Move called - Direction={moveDirection}, IsMoving={isMoving}");
         }
 
         public void Stop()
         {
-            currentVelocity = Vector2.zero;
+            moveDirection = Vector2.zero;
+            isMoving = false;
+            Debug.Log("ThoughtBoatSailingController: Stop called");
+        }
+
+        private void ApplyMentalCost()
+        {
+            if (mindSystem != null)
+            {
+                mindSystem.ConsumeMentalStrength(movementMentalCost, Time.time);
+                Debug.Log($"ThoughtBoatSailingController: Applied mental cost: {movementMentalCost}");
+            }
         }
 
         // Interaction functionality

@@ -7,6 +7,7 @@ using BecomeSisyphus.Core;
 using BecomeSisyphus.Core.GameStateSystem;
 using BecomeSisyphus.Core.Interfaces;
 using BecomeSisyphus.Managers.Systems;
+using BecomeSisyphus.Managers.Behaviours;
 
 namespace BecomeSisyphus
 {
@@ -39,6 +40,7 @@ namespace BecomeSisyphus
             CreateSystemBehaviour<SisyphusMindSystemBehaviour>("SisyphusMindSystemBehaviour");
             CreateSystemBehaviour<ConfusionSystemBehaviour>("ConfusionSystemBehaviour");
             CreateSystemBehaviour<ThoughtVesselSystemBehaviour>("ThoughtVesselSystemBehaviour");
+            CreateSystemBehaviour<ThoughtBoatSystemBehaviour>("ThoughtBoatSystemBehaviour");
             CreateSystemBehaviour<MindOceanSystemBehaviour>("MindOceanSystemBehaviour");
             CreateSystemBehaviour<MemorySystemBehaviour>("MemorySystemBehaviour");
             CreateSystemBehaviour<ExplorationSystemBehaviour>("ExplorationSystemBehaviour");
@@ -95,6 +97,7 @@ namespace BecomeSisyphus
             RegisterSystem(new ExplorationSystem());
             RegisterSystem(new MindOceanSystem());
             RegisterSystem(new SignifierSystem());
+            RegisterSystem(new ThoughtBoatSystem());
 
             Debug.Log("GameManager: All systems initialized successfully");
         }
