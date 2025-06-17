@@ -4,16 +4,16 @@ using System.Linq;
 using System.Collections.Generic;
 
 using BecomeSisyphus.Core;
-using BecomeSisyphus.Managers.Systems;
+using BecomeSisyphus.Core.GameStateSystem;
 using BecomeSisyphus.Core.Interfaces;
+using BecomeSisyphus.Managers.Systems;
+using BecomeSisyphus.Managers.Behaviours;
 
 namespace BecomeSisyphus
 {
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
-        
-        public GameState CurrentState { get; private set; }
         
         private Dictionary<System.Type, ISystem> systems = new Dictionary<System.Type, ISystem>();
         
@@ -40,6 +40,7 @@ namespace BecomeSisyphus
             CreateSystemBehaviour<SisyphusMindSystemBehaviour>("SisyphusMindSystemBehaviour");
             CreateSystemBehaviour<ConfusionSystemBehaviour>("ConfusionSystemBehaviour");
             CreateSystemBehaviour<ThoughtVesselSystemBehaviour>("ThoughtVesselSystemBehaviour");
+            CreateSystemBehaviour<ThoughtBoatSystemBehaviour>("ThoughtBoatSystemBehaviour");
             CreateSystemBehaviour<MindOceanSystemBehaviour>("MindOceanSystemBehaviour");
             CreateSystemBehaviour<MemorySystemBehaviour>("MemorySystemBehaviour");
             CreateSystemBehaviour<ExplorationSystemBehaviour>("ExplorationSystemBehaviour");
@@ -63,6 +64,7 @@ namespace BecomeSisyphus
             }
 
             // 基础系统先初始化
+            RegisterSystem(new GameStateManager());
             RegisterSystem(new TimeSystem(config.timeScale, config.dayLength));
             RegisterSystem(new CameraSystem());
             
@@ -95,6 +97,7 @@ namespace BecomeSisyphus
             RegisterSystem(new ExplorationSystem());
             RegisterSystem(new MindOceanSystem());
             RegisterSystem(new SignifierSystem());
+            RegisterSystem(new ThoughtBoatSystem());
 
             Debug.Log("GameManager: All systems initialized successfully");
         }
@@ -122,11 +125,16 @@ namespace BecomeSisyphus
             // Debug.LogError($"GameManager: Available systems: {string.Join(", ", systems.Keys.Select(k => k.Name))}");
             return default;
         }
-
-        public void ChangeState(GameState newState)
+        
+        // Debug method to list all registered systems
+        [ContextMenu("List All Systems")]
+        public void ListAllSystems()
         {
-            CurrentState = newState;
-            // 在这里处理状态切换逻辑
+            Debug.Log($"GameManager: Total registered systems: {systems.Count}");
+            foreach (var kvp in systems)
+            {
+                Debug.Log($"  - {kvp.Key.Name}: {kvp.Value}");
+            }
         }
 
         private void Update()

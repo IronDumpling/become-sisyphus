@@ -1,6 +1,7 @@
 using UnityEngine;
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Core.Interfaces;
+using BecomeSisyphus.Core.GameStateSystem;
 using BecomeSisyphus.Inputs.Controllers;
 using BecomeSisyphus.Managers.Systems;
 
@@ -29,39 +30,68 @@ namespace BecomeSisyphus.Inputs.Commands
         {
             Debug.Log("SwitchToInsideWorldCommand: Starting execution...");
             
-            if (GameManager.Instance == null)
+            // 使用新的状态管理系统
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
             {
-                Debug.LogError("SwitchToInsideWorldCommand: GameManager.Instance is null!");
-                return;
-            }
-            
-            Debug.Log("SwitchToInsideWorldCommand: Changing game state to Sailing...");
-            GameManager.Instance.ChangeState(GameState.Sailing);
-            
-            Debug.Log("SwitchToInsideWorldCommand: Getting CameraSystem...");
-            var cameraSystem = GameManager.Instance.GetSystem<CameraSystem>();
-            
-            if (cameraSystem == null)
-            {
-                Debug.LogError("SwitchToInsideWorldCommand: CameraSystem is null!");
-                return;
-            }
-            
-            Debug.Log("SwitchToInsideWorldCommand: Calling SwitchToInsideWorld...");
-            cameraSystem.SwitchToInsideWorld();
-            
-            // Switch to inside world input action map
-            Debug.Log("SwitchToInsideWorldCommand: Switching input action map to InsideWorld...");
-            if (BecomeSisyphus.Inputs.InputManager.Instance != null)
-            {
-                BecomeSisyphus.Inputs.InputManager.Instance.SwitchActionMap("InsideWorld");
+                Debug.Log("SwitchToInsideWorldCommand: Switching to InsideWorld/Sailing state...");
+                stateManager.SwitchToState("InsideGame/InsideWorld/Sailing");
+                Debug.Log("SwitchToInsideWorldCommand: Execution completed - Switched to Inside World (Sailing State)");
             }
             else
             {
-                Debug.LogError("SwitchToInsideWorldCommand: InputManager.Instance is null!");
+                Debug.LogError("SwitchToInsideWorldCommand: GameStateManager.Instance is null!");
             }
+        }
+    }
+
+    /// <summary>
+    /// 开始爬山命令 (MountainFoot -> Climbing)
+    /// </summary>
+    public class StartClimbingCommand : ICommand
+    {
+        public void Execute()
+        {
+            Debug.Log("StartClimbingCommand: Executing start climbing");
             
-            Debug.Log("SwitchToInsideWorldCommand: Execution completed - Switched to Inside World (Sailing State)");
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                var currentState = stateManager.CurrentActiveState;
+                if (currentState is MountainFootState mountainFootState)
+                {
+                    mountainFootState.StartClimbing();
+                }
+                else
+                {
+                    Debug.LogWarning($"StartClimbingCommand: Cannot execute from current state: {currentState?.StateName}");
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 进入内部世界命令 (Climbing -> InsideWorld)
+    /// </summary>
+    public class EnterInsideWorldCommand : ICommand
+    {
+        public void Execute()
+        {
+            Debug.Log("EnterInsideWorldCommand: Executing enter inside world");
+            
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                var currentState = stateManager.CurrentActiveState;
+                if (currentState is ClimbingState climbingState)
+                {
+                    climbingState.EnterInsideWorld();
+                }
+                else
+                {
+                    Debug.LogWarning($"EnterInsideWorldCommand: Cannot execute from current state: {currentState?.StateName}");
+                }
+            }
         }
     }
 } 

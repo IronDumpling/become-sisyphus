@@ -1,6 +1,7 @@
 using UnityEngine;
 using BecomeSisyphus.Core.Interfaces;
 using BecomeSisyphus.Inputs.Controllers;
+using BecomeSisyphus.Core.GameStateSystem;
 
 namespace BecomeSisyphus.Inputs.Commands
 {
@@ -41,7 +42,7 @@ namespace BecomeSisyphus.Inputs.Commands
     public class MoveBoatCommand : ICommand
     {
         private readonly ThoughtBoatSailingController controller;
-        private readonly Vector2 direction;
+        private Vector2 direction;
 
         public MoveBoatCommand(ThoughtBoatSailingController controller, Vector2 direction)
         {
@@ -51,10 +52,49 @@ namespace BecomeSisyphus.Inputs.Commands
 
         public void Execute()
         {
-            controller.Move(direction);
+            // Validate current state before executing
+            var stateManager = BecomeSisyphus.Core.GameStateSystem.GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                var currentState = stateManager.CurrentActiveState;
+                var statePath = currentState?.GetFullStatePath();
+                
+                // Only allow boat movement in sailing states
+                if (statePath != null && statePath.Contains("Sailing"))
+                {
+                    controller.Move(direction);
+                    
+                    // Also notify the sailing state
+                    if (currentState is SailingState sailingState)
+                    {
+                        sailingState.MoveBoat(direction);
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"MoveBoatCommand: Cannot move boat in current state: {currentState?.StateName}");
+                }
+            }
+            else
+            {
+                // Fallback if no state manager
+                controller.Move(direction);
+            }
+        }
+
+        /// <summary>
+        /// Update the movement direction for dynamic input
+        /// </summary>
+        public void UpdateDirection(Vector2 newDirection)
+        {
+            direction = newDirection;
         }
     }
 
+    /// <summary>
+    /// [DEPRECATED] This command is no longer needed as boat stopping is now handled automatically
+    /// when input is released through InputManager.OnActionCanceled
+    /// </summary>
     public class StopBoatCommand : ICommand
     {
         private readonly ThoughtBoatSailingController controller;

@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Core.Interfaces;
+using BecomeSisyphus.Core.GameStateSystem;
 
 namespace BecomeSisyphus.Managers.Systems
 {
@@ -39,8 +40,23 @@ namespace BecomeSisyphus.Managers.Systems
 
         public void Update()
         {
-            if (GameManager.Instance.CurrentState == GameState.Climbing ||
-                GameManager.Instance.CurrentState == GameState.ExploringMind)
+            // Check if we're in states where time should progress
+            var stateManager = GameStateManager.Instance;
+            bool shouldProgressTime = false;
+            
+            if (stateManager != null)
+            {
+                var currentStatePath = stateManager.GetCurrentStatePath();
+                // Time progresses during climbing, sailing, and mind exploration
+                shouldProgressTime = currentStatePath.Contains("Climbing") ||
+                                   currentStatePath.Contains("Sailing") ||
+                                   currentStatePath.Contains("ExploringMind") ||
+                                   currentStatePath.Contains("Harbour") ||  // Resting at harbour
+                                   currentStatePath.Contains("Lighthouse") ||  // Resting at lighthouse
+                                   currentStatePath.Contains("Salvage");  // Salvaging action
+            }
+            
+            if (shouldProgressTime)
             {
                 realTime += Time.deltaTime * timeScale;
                 gameTime += Time.deltaTime * timeScale / 60f; // 转换为分钟

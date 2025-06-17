@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Core.Data;
 using BecomeSisyphus.Core.Interfaces;
+using BecomeSisyphus.Core.GameStateSystem;
 
 namespace BecomeSisyphus.Managers.Systems
 {
@@ -26,7 +27,8 @@ namespace BecomeSisyphus.Managers.Systems
 
         public void Update()
         {
-            if (GameManager.Instance.CurrentState == GameState.ExploringMind)
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null && stateManager.IsInState("ExploringMind"))
             {
                 HandleExplorationInput();
                 ConsumeMentalStrength();

@@ -32,7 +32,16 @@ namespace BecomeSisyphus.Inputs.Controllers
         public void CloseTelescopeUI()
         {
             Debug.Log("Closing Telescope UI");
-            GameManager.Instance.ChangeState(GameState.Sailing);
+            // Use new state system to return to sailing
+            var stateManager = BecomeSisyphus.Core.GameStateSystem.GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                stateManager.SwitchToState("InsideGame/InsideWorld/Sailing");
+            }
+            else
+            {
+                Debug.LogError("GameStateManager not found! Cannot close telescope UI properly.");
+            }
             // TODO: 实现UI关闭逻辑
         }
     }

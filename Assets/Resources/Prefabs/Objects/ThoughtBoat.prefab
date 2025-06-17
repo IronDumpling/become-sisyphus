@@ -9,6 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1639657049344041259}
+  - component: {fileID: 2820894956479803047}
+  - component: {fileID: 3771634534058782927}
   m_Layer: 0
   m_Name: ThoughtBoat
   m_TagString: Untagged
@@ -32,6 +34,36 @@ Transform:
   - {fileID: 2499452133534955587}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2820894956479803047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 582186255203336312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d26a63d712ad6e04599b2d050bd99fbe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 10
+  rotationSpeed: 100
+  accelerationTime: 1
+  decelerationTime: 0.5
+  movementMentalCost: 0.5
+  mentalCostInterval: 1
+--- !u!114 &3771634534058782927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 582186255203336312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff909aa6d3ccc5a40893d5736812ca06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2864712894713790935
 GameObject:
   m_ObjectHideFlags: 0
