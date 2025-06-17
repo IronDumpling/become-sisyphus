@@ -8,27 +8,64 @@ using BecomeSisyphus.Managers.Systems;
 
 namespace BecomeSisyphus.Inputs.Commands
 {
-    public class SwitchToOutsideWorldCommand : ICommand
+    /// <summary>
+    /// Unified command to enter outside world from any inside world state
+    /// </summary>
+    public class EnterOutsideWorldFromInsideCommand : ICommand
     {
         public void Execute()
         {
-            Debug.Log("SwitchToOutsideWorldCommand: Starting execution...");
+            Debug.Log("EnterOutsideWorldFromInsideCommand: Executing enter outside world");
             
-            // 使用新的状态管理系统
             var stateManager = GameStateManager.Instance;
             if (stateManager != null)
             {
-                Debug.Log("SwitchToOutsideWorldCommand: Switching to OutsideWorld/Climbing state...");
-                stateManager.SwitchToState("InsideGame/OutsideWorld/Climbing");
-                Debug.Log("SwitchToOutsideWorldCommand: Execution completed - Switched to Outside World (Climbing State)");
+                var currentState = stateManager.CurrentActiveState;
+                var statePath = currentState?.GetFullStatePath();
+                
+                Debug.Log($"EnterOutsideWorldFromInsideCommand: Current state: {currentState?.StateName}, Path: {statePath}");
+                
+                if (statePath != null && statePath.Contains("InsideWorld"))
+                {
+                    if (currentState is HarbourInteractionState harbourState)
+                    {
+                        Debug.Log("EnterOutsideWorldFromInsideCommand: Exiting from harbour interaction");
+                        harbourState.EnterOutsideWorld();
+                    }
+                    else if (currentState is SailingState sailingState)
+                    {
+                        Debug.Log("EnterOutsideWorldFromInsideCommand: Exiting from sailing state");
+                        sailingState.EnterOutsideWorld();
+                    }
+                    else if (currentState is LighthouseInteractionState lighthouseState)
+                    {
+                        Debug.Log("EnterOutsideWorldFromInsideCommand: Exiting from lighthouse interaction");
+                        stateManager.SwitchToLastOutsideWorldState();
+                    }
+                    else if (currentState is SalvageInteractionState salvageState)
+                    {
+                        Debug.Log("EnterOutsideWorldFromInsideCommand: Exiting from salvage interaction");
+                        stateManager.SwitchToLastOutsideWorldState();
+                    }
+                    else
+                    {
+                        Debug.Log("EnterOutsideWorldFromInsideCommand: Using fallback to last outside world state");
+                        // Fallback for other inside world states
+                        stateManager.SwitchToLastOutsideWorldState();
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"EnterOutsideWorldFromInsideCommand: Cannot execute from current state: {currentState?.StateName}");
+                }
             }
             else
             {
-                Debug.LogError("SwitchToOutsideWorldCommand: GameStateManager.Instance is null!");
+                Debug.LogError("EnterOutsideWorldFromInsideCommand: GameStateManager.Instance is null!");
             }
         }
     }
-
+    
     public class UsePerceptionSkillCommand : ICommand
     {
         private readonly OutsideWorldController outsideController;
@@ -54,77 +91,6 @@ namespace BecomeSisyphus.Inputs.Commands
             }
             
             Debug.Log("Using Perception Skill and switching to Outside World");
-        }
-    }
-
-    /// <summary>
-    /// 开始航行命令 (Resting -> Sailing)
-    /// </summary>
-    public class StartSailingCommand : ICommand
-    {
-        public void Execute()
-        {
-            Debug.Log("StartSailingCommand: Executing start sailing");
-            
-            var stateManager = GameStateManager.Instance;
-            if (stateManager != null)
-            {
-                var currentState = stateManager.CurrentActiveState;
-                if (currentState is HarbourInteractionState harbourState)
-                {
-                    harbourState.StartSailing();
-                }
-                else if (currentState is LighthouseInteractionState lighthouseState)
-                {
-                    // If we add StartSailing to lighthouse state as well
-                    Debug.Log("StartSailingCommand: Starting sailing from lighthouse");
-                    var insideWorldState = stateManager.CurrentRootState?.SubStates["InsideWorld"];
-                    insideWorldState?.SwitchToSubState("Sailing");
-                }
-                else
-                {
-                    Debug.LogWarning($"StartSailingCommand: Cannot execute from current state: {currentState?.StateName}");
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// 进入外部世界命令 (从任何InsideWorld状态)
-    /// </summary>
-    public class EnterOutsideWorldFromInsideCommand : ICommand
-    {
-        public void Execute()
-        {
-            Debug.Log("EnterOutsideWorldFromInsideCommand: Executing enter outside world");
-            
-            var stateManager = GameStateManager.Instance;
-            if (stateManager != null)
-            {
-                var currentState = stateManager.CurrentActiveState;
-                var statePath = currentState?.GetFullStatePath();
-                
-                if (statePath != null && statePath.Contains("InsideWorld"))
-                {
-                    if (currentState is HarbourInteractionState harbourState)
-                    {
-                        harbourState.EnterOutsideWorld();
-                    }
-                    else if (currentState is SailingState sailingState)
-                    {
-                        sailingState.EnterOutsideWorld();
-                    }
-                    else
-                    {
-                        // Fallback for other inside world states
-                        stateManager.SwitchToLastOutsideWorldState();
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning($"EnterOutsideWorldFromInsideCommand: Cannot execute from current state: {currentState?.StateName}");
-                }
-            }
         }
     }
 } 

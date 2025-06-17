@@ -185,7 +185,7 @@ namespace BecomeSisyphus.Inputs
             Debug.Log("InputManager: Registering InsideWorld commands...");
 
             // State-specific commands
-            RegisterCommand("StartSailing", new StartSailingCommand());
+            RegisterCommand("StartSailing", new CloseInteractionCommand());
             RegisterCommand("EnterOutsideWorld", new EnterOutsideWorldFromInsideCommand());
             
             // Store move command for dynamic updates (using original MoveBoatCommand)
@@ -226,7 +226,7 @@ namespace BecomeSisyphus.Inputs
         {
             if (thoughtBoatInteractionController == null) return;
 
-            RegisterCommand("CloseInteraction", new CloseInteractionCommand(thoughtBoatInteractionController));
+            // RegisterCommand("CloseInteraction", new CloseInteractionCommand(thoughtBoatInteractionController));
         }
 
         private void RegisterThoughtVesselCommands()

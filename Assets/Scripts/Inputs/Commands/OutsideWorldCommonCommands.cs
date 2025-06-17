@@ -24,27 +24,6 @@ namespace BecomeSisyphus.Inputs.Commands
         }
     }
 
-    public class SwitchToInsideWorldCommand : ICommand
-    {
-        public void Execute()
-        {
-            Debug.Log("SwitchToInsideWorldCommand: Starting execution...");
-            
-            // 使用新的状态管理系统
-            var stateManager = GameStateManager.Instance;
-            if (stateManager != null)
-            {
-                Debug.Log("SwitchToInsideWorldCommand: Switching to InsideWorld/Sailing state...");
-                stateManager.SwitchToState("InsideGame/InsideWorld/Sailing");
-                Debug.Log("SwitchToInsideWorldCommand: Execution completed - Switched to Inside World (Sailing State)");
-            }
-            else
-            {
-                Debug.LogError("SwitchToInsideWorldCommand: GameStateManager.Instance is null!");
-            }
-        }
-    }
-
     /// <summary>
     /// 开始爬山命令 (MountainFoot -> Climbing)
     /// </summary>
