@@ -19,8 +19,8 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-                },
-                {
+        },
+        {
                     "name": "EnterInsideWorld",
                     "type": "Button",
                     "id": "b58cadc7-9edd-4010-9181-a02a4af2f604",

@@ -23,9 +23,7 @@ namespace BecomeSisyphus.Inputs
         private MoveBoatCommand sailingMoveBoatCommand;
 
         // Controllers
-        private OutsideWorldController outsideWorldController;
         private ThoughtBoatSailingController thoughtBoatSailingController;
-        private ThoughtBoatInteractionController thoughtBoatInteractionController;
         private ThoughtVesselController thoughtVesselController;
         private TelescopeController telescopeController;
 
@@ -48,17 +46,13 @@ namespace BecomeSisyphus.Inputs
         {
             // Find controllers in current scene
             thoughtBoatSailingController = FindAnyObjectByType<ThoughtBoatSailingController>();
-            thoughtBoatInteractionController = FindAnyObjectByType<ThoughtBoatInteractionController>();
             thoughtVesselController = FindAnyObjectByType<ThoughtVesselController>();
             telescopeController = FindAnyObjectByType<TelescopeController>();
-            outsideWorldController = FindAnyObjectByType<OutsideWorldController>();
 
             Debug.Log($"InputManager: SetActiveControllers - Found controllers: " +
                      $"ThoughtBoatSailing={thoughtBoatSailingController != null}, " +
-                     $"ThoughtBoatInteraction={thoughtBoatInteractionController != null}, " +
                      $"ThoughtVessel={thoughtVesselController != null}, " +
-                     $"Telescope={telescopeController != null}, " +
-                     $"OutsideWorld={outsideWorldController != null}");
+                     $"Telescope={telescopeController != null}");
         }
 
         private void InitializeInputActions()
@@ -159,12 +153,6 @@ namespace BecomeSisyphus.Inputs
 
         private void RegisterOutsideWorldCommands()
         {
-            if (outsideWorldController == null) 
-            {
-                Debug.LogError("InputManager: outsideWorldController is null in RegisterOutsideWorldCommands!");
-                return;
-            }
-
             Debug.Log("InputManager: Registering OutsideWorld commands...");
 
             // State-specific commands based on current state
@@ -224,9 +212,7 @@ namespace BecomeSisyphus.Inputs
 
         private void RegisterBoatInteractionCommands()
         {
-            if (thoughtBoatInteractionController == null) return;
 
-            // RegisterCommand("CloseInteraction", new CloseInteractionCommand(thoughtBoatInteractionController));
         }
 
         private void RegisterThoughtVesselCommands()

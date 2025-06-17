@@ -66,9 +66,9 @@ namespace BecomeSisyphus.Inputs.Controllers
             {
                 mindSystem = GameManager.Instance.GetSystem<SisyphusMindSystem>();
                 boatSystem = GameManager.Instance.GetSystem<ThoughtBoatSystem>();
-                mindOceanSystem = GameManager.Instance.GetSystem<MindOceanSystem>();
-                explorationSystem = GameManager.Instance.GetSystem<ExplorationSystem>();
-                vesselSystem = GameManager.Instance.GetSystem<VesselSystem>();
+            mindOceanSystem = GameManager.Instance.GetSystem<MindOceanSystem>();
+            explorationSystem = GameManager.Instance.GetSystem<ExplorationSystem>();
+            vesselSystem = GameManager.Instance.GetSystem<VesselSystem>();
                 
                 Debug.Log($"ThoughtBoatSailingController: Got system references - " +
                          $"MindSystem={mindSystem != null}, " +
@@ -154,7 +154,7 @@ namespace BecomeSisyphus.Inputs.Controllers
             if (wasMoving != isMoving)
             {
                 if (isMoving)
-                {
+            {
                     Debug.Log($"ThoughtBoatSailingController: Started moving - Direction={moveDirection}");
                 }
                 else
