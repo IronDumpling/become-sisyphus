@@ -27,9 +27,41 @@ namespace BecomeSisyphus.Inputs.Commands
     {
         public void Execute()
         {
+            Debug.Log("SwitchToInsideWorldCommand: Starting execution...");
+            
+            if (GameManager.Instance == null)
+            {
+                Debug.LogError("SwitchToInsideWorldCommand: GameManager.Instance is null!");
+                return;
+            }
+            
+            Debug.Log("SwitchToInsideWorldCommand: Changing game state to Sailing...");
             GameManager.Instance.ChangeState(GameState.Sailing);
-            GameManager.Instance.GetSystem<CameraSystem>().SwitchToInsideWorld();
-            Debug.Log("Switching to Inside World (Sailing State)");
+            
+            Debug.Log("SwitchToInsideWorldCommand: Getting CameraSystem...");
+            var cameraSystem = GameManager.Instance.GetSystem<CameraSystem>();
+            
+            if (cameraSystem == null)
+            {
+                Debug.LogError("SwitchToInsideWorldCommand: CameraSystem is null!");
+                return;
+            }
+            
+            Debug.Log("SwitchToInsideWorldCommand: Calling SwitchToInsideWorld...");
+            cameraSystem.SwitchToInsideWorld();
+            
+            // Switch to inside world input action map
+            Debug.Log("SwitchToInsideWorldCommand: Switching input action map to InsideWorld...");
+            if (BecomeSisyphus.Inputs.InputManager.Instance != null)
+            {
+                BecomeSisyphus.Inputs.InputManager.Instance.SwitchActionMap("InsideWorld");
+            }
+            else
+            {
+                Debug.LogError("SwitchToInsideWorldCommand: InputManager.Instance is null!");
+            }
+            
+            Debug.Log("SwitchToInsideWorldCommand: Execution completed - Switched to Inside World (Sailing State)");
         }
     }
 } 

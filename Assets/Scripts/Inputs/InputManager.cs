@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using System.Linq;
 using BecomeSisyphus.Core.Interfaces;
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Inputs.Commands;
@@ -101,8 +102,19 @@ namespace BecomeSisyphus.Inputs
                 return;
             }
 
+            Debug.Log($"InputManager: Initializing Input Actions. Found {inputActions.actionMaps.Count} action maps");
+
             foreach (var actionMap in inputActions.actionMaps)
             {
+                Debug.Log($"InputManager: Found action map: {actionMap.name} with {actionMap.actions.Count} actions");
+                foreach (var action in actionMap.actions)
+                {
+                    Debug.Log($"    Action: {action.name}");
+                    foreach (var binding in action.bindings)
+                    {
+                        Debug.Log($"      Binding: {binding.path}");
+                    }
+                }
                 actionMap.Enable();
                 actionMap.Disable();
             }
@@ -113,8 +125,12 @@ namespace BecomeSisyphus.Inputs
 
         public void SwitchActionMap(string actionMapName)
         {
+            Debug.Log($"InputManager: Attempting to switch to action map: {actionMapName}");
+            
             if (currentActionMap != null)
             {
+                Debug.Log($"InputManager: Disabling current action map: {currentActionMap.name}");
+                UnsubscribeFromActions();
                 currentActionMap.Disable();
                 UnregisterAllCommands();
             }
@@ -122,13 +138,24 @@ namespace BecomeSisyphus.Inputs
             currentActionMap = inputActions.FindActionMap(actionMapName);
             if (currentActionMap != null)
             {
+                Debug.Log($"InputManager: Found action map: {actionMapName}, enabling...");
                 currentActionMap.Enable();
+                
+                // Log all actions in this action map
+                Debug.Log($"InputManager: Action map {actionMapName} has {currentActionMap.actions.Count} actions:");
+                foreach (var action in currentActionMap.actions)
+                {
+                    Debug.Log($"  - Action: {action.name}, Enabled: {action.enabled}");
+                }
+                
                 RegisterCommandsForActionMap(actionMapName);
-                Debug.Log($"Switched to action map: {actionMapName}");
+                SubscribeToActions();
+                Debug.Log($"InputManager: Successfully switched to action map: {actionMapName}");
             }
             else
             {
-                Debug.LogError($"Action map not found: {actionMapName}");
+                Debug.LogError($"InputManager: Action map not found: {actionMapName}");
+                Debug.LogError($"InputManager: Available action maps: {string.Join(", ", inputActions.actionMaps.Select(am => am.name))}");
             }
         }
 
@@ -144,26 +171,38 @@ namespace BecomeSisyphus.Inputs
                     break;
                 case "BoatSailing":
                     RegisterBoatSailingCommands();
+                    RegisterInsideWorldCommands();
                     break;
                 case "BoatInteraction":
                     RegisterBoatInteractionCommands();
+                    RegisterInsideWorldCommands();
                     break;
                 case "ThoughtVessel":
                     RegisterThoughtVesselCommands();
+                    RegisterInsideWorldCommands();
                     break;
                 case "Telescope":
                     RegisterTelescopeCommands();
+                    RegisterInsideWorldCommands();
                     break;
             }
         }
 
         private void RegisterOutsideWorldCommands()
         {
-            if (outsideWorldController == null) return;
+            if (outsideWorldController == null) 
+            {
+                Debug.LogError("InputManager: outsideWorldController is null in RegisterOutsideWorldCommands!");
+                return;
+            }
+
+            Debug.Log("InputManager: Registering OutsideWorld commands...");
 
             RegisterCommand("SelectSignifier", new SelectSignifierCommand(outsideWorldController, Vector2.zero));
             RegisterCommand("SwitchToInsideWorld", new SwitchToInsideWorldCommand());
             RegisterCommand("UsePerceptionSkill", new UsePerceptionSkillCommand(outsideWorldController));
+
+            Debug.Log("InputManager: Finished registering OutsideWorld commands");
         }
 
         private void RegisterInsideWorldCommands()
@@ -176,7 +215,13 @@ namespace BecomeSisyphus.Inputs
 
         private void RegisterBoatSailingCommands()
         {
-            if (thoughtBoatSailingController == null) return;
+            if (thoughtBoatSailingController == null) 
+            {
+                Debug.LogError("InputManager: thoughtBoatSailingController is null in RegisterBoatSailingCommands!");
+                return;
+            }
+
+            Debug.Log("InputManager: Registering BoatSailing commands...");
 
             RegisterCommand("MoveBoat", new MoveBoatCommand(thoughtBoatSailingController, Vector2.zero));
             RegisterCommand("StopBoat", new StopBoatCommand(thoughtBoatSailingController));
@@ -189,6 +234,9 @@ namespace BecomeSisyphus.Inputs
             RegisterCommand("OpenVesselUI", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Vessel));
             RegisterCommand("OpenNavigationMap", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.NavigationMap));
             RegisterCommand("OpenTelescope", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Telescope));
+            // RegisterCommand("SwitchToOutsideWorld", new SwitchToOutsideWorldCommand());
+
+            Debug.Log("InputManager: Finished registering BoatSailing commands");
         }
 
         private void RegisterBoatInteractionCommands()
@@ -250,20 +298,73 @@ namespace BecomeSisyphus.Inputs
 
         public void ExecuteCommand(string actionName)
         {
+            Debug.Log($"InputManager: Attempting to execute command: {actionName}");
+            
             if (commandMap.TryGetValue(actionName, out ICommand command))
             {
+                Debug.Log($"InputManager: Found command for {actionName}, executing...");
                 command.Execute();
+                Debug.Log($"InputManager: Command {actionName} executed successfully");
             }
             else
             {
-                Debug.LogWarning($"No command registered for action: {actionName}");
+                Debug.LogWarning($"InputManager: No command registered for action: {actionName}");
+                Debug.LogWarning($"InputManager: Available commands: {string.Join(", ", commandMap.Keys)}");
             }
+        }
+
+        private void SubscribeToActions()
+        {
+            if (currentActionMap == null) return;
+            
+            Debug.Log($"InputManager: Subscribing to actions in {currentActionMap.name}");
+            
+            foreach (var action in currentActionMap.actions)
+            {
+                Debug.Log($"InputManager: Subscribing to action: {action.name}");
+                action.performed += OnActionPerformed;
+                action.canceled += OnActionCanceled;
+                action.started += OnActionStarted;
+            }
+        }
+        
+        private void UnsubscribeFromActions()
+        {
+            if (currentActionMap == null) return;
+            
+            Debug.Log($"InputManager: Unsubscribing from actions in {currentActionMap.name}");
+            
+            foreach (var action in currentActionMap.actions)
+            {
+                action.performed -= OnActionPerformed;
+                action.canceled -= OnActionCanceled;
+                action.started -= OnActionStarted;
+            }
+        }
+        
+        private void OnActionPerformed(InputAction.CallbackContext context)
+        {
+            Debug.Log($"InputManager: Action performed: {context.action.name}");
+            ExecuteCommand(context.action.name);
+        }
+        
+        private void OnActionCanceled(InputAction.CallbackContext context)
+        {
+            Debug.Log($"InputManager: Action canceled: {context.action.name}");
+            // Handle action canceled if needed
+        }
+        
+        private void OnActionStarted(InputAction.CallbackContext context)
+        {
+            Debug.Log($"InputManager: Action started: {context.action.name}");
+            // Handle action started if needed
         }
 
         private void OnDestroy()
         {
             if (currentActionMap != null)
             {
+                UnsubscribeFromActions();
                 currentActionMap.Disable();
             }
             commandMap.Clear();

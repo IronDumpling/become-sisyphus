@@ -1,5 +1,8 @@
 using UnityEngine;
+
+using System.Linq;
 using System.Collections.Generic;
+
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Managers.Systems;
 using BecomeSisyphus.Core.Interfaces;
@@ -53,7 +56,17 @@ namespace BecomeSisyphus
 
         private void InitializeSystems()
         {
-            // Use config to initialize each system with parameters
+            if (config == null)
+            {
+                Debug.LogError("GameManager: GameConfiguration is not set in inspector!");
+                return;
+            }
+
+            // 基础系统先初始化
+            RegisterSystem(new TimeSystem(config.timeScale, config.dayLength));
+            RegisterSystem(new CameraSystem());
+            
+            // 核心游戏系统
             RegisterSystem(new SisyphusManager(
                 config.managerMentalStrength, 
                 config.managerMaxBrainCapacity, 
@@ -64,6 +77,8 @@ namespace BecomeSisyphus
                 config.mentalStrengthRegenRate, 
                 config.mentalStrengthRegenDelay
             ));
+            
+            // 游戏机制系统
             RegisterSystem(new ConfusionSystem(
                 config.confusionGenerationInterval, 
                 config.temporaryConfusionDuration
@@ -74,28 +89,37 @@ namespace BecomeSisyphus
                 config.loadRatioThreshold, 
                 config.mentalStrengthConsumptionRate
             ));
+            
+            // 辅助系统
             RegisterSystem(new MemorySystem());
             RegisterSystem(new ExplorationSystem());
             RegisterSystem(new MindOceanSystem());
             RegisterSystem(new SignifierSystem());
-            RegisterSystem(new TimeSystem(
-                config.timeScale, 
-                config.dayLength
-            ));
+
+            Debug.Log("GameManager: All systems initialized successfully");
         }
 
         private void RegisterSystem(ISystem system)
         {
+            Debug.Log($"GameManager: Registering system: {system.GetType().Name}");
             systems[system.GetType()] = system;
+            Debug.Log($"GameManager: Initializing system: {system.GetType().Name}");
             system.Initialize();
+            Debug.Log($"GameManager: System {system.GetType().Name} registered and initialized successfully");
         }
 
         public T GetSystem<T>() where T : ISystem
         {
+            Debug.Log($"GameManager: Attempting to get system: {typeof(T).Name}");
+            
             if (systems.TryGetValue(typeof(T), out ISystem system))
             {
+                Debug.Log($"GameManager: Found system: {typeof(T).Name}");
                 return (T)system;
             }
+            
+            // Debug.LogError($"GameManager: System not found: {typeof(T).Name}");
+            // Debug.LogError($"GameManager: Available systems: {string.Join(", ", systems.Keys.Select(k => k.Name))}");
             return default;
         }
 
