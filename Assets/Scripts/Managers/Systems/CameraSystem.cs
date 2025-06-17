@@ -21,7 +21,7 @@ namespace BecomeSisyphus.Managers.Systems
             Debug.Log($"CameraSystem: Found CameraSystemBehaviour: {behaviour != null}");
             
             if (!ValidateSystemState()) return;
-
+            
             // Use new state system to determine initial camera
             var stateManager = GameStateManager.Instance;
             if (stateManager != null)

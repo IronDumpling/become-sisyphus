@@ -62,9 +62,9 @@ namespace BecomeSisyphus
             }
 
             // 基础系统先初始化
+            RegisterSystem(new GameStateManager());
             RegisterSystem(new TimeSystem(config.timeScale, config.dayLength));
             RegisterSystem(new CameraSystem());
-            RegisterSystem(new BecomeSisyphus.Core.GameStateSystem.GameStateManager());
             
             // 核心游戏系统
             RegisterSystem(new SisyphusManager(

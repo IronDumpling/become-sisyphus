@@ -18,6 +18,10 @@ namespace BecomeSisyphus.Core.GameStateSystem
             // 主菜单进入逻辑
             Debug.Log("MainMenuState: Setting up main menu UI");
             
+            // TEMPORARY: Auto-transition to game for prototype
+            Debug.Log("MainMenuState: Auto-transitioning to OutsideWorld for prototype");
+            StartGame();
+            
             // 可以在这里添加：
             // - 显示主菜单UI
             // - 播放背景音乐
