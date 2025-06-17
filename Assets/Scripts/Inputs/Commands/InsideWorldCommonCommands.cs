@@ -7,23 +7,6 @@ using BecomeSisyphus.Managers.Systems;
 
 namespace BecomeSisyphus.Inputs.Commands
 {
-    public class MoveThoughtBoatCommand : ICommand
-    {
-        private readonly ThoughtBoatController controller;
-        private readonly Vector2 direction;
-
-        public MoveThoughtBoatCommand(ThoughtBoatController controller, Vector2 direction)
-        {
-            this.controller = controller;
-            this.direction = direction;
-        }
-
-        public void Execute()
-        {
-            // TODO: 实现思维船移动逻辑
-        }
-    }
-
     public class SwitchToOutsideWorldCommand : ICommand
     {
         public void Execute()

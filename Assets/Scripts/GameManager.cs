@@ -82,7 +82,6 @@ namespace BecomeSisyphus
                 config.timeScale, 
                 config.dayLength
             ));
-            RegisterSystem(new CameraSystem());
         }
 
         private void RegisterSystem(ISystem system)
