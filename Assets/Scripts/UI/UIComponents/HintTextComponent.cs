@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using DG.Tweening;
 
 namespace BecomeSisyphus.UI.Components
 {
@@ -21,6 +22,7 @@ namespace BecomeSisyphus.UI.Components
         private CanvasGroup canvasGroup;
         private string currentText;
         private float originalAlpha;
+        private Tween pulseTween;
 
         private void Awake()
         {
@@ -32,7 +34,8 @@ namespace BecomeSisyphus.UI.Components
             if (canvasGroup == null)
                 canvasGroup = gameObject.AddComponent<CanvasGroup>();
 
-            originalAlpha = canvasGroup.alpha;
+            originalAlpha = 1f; // Set default alpha to 1
+            canvasGroup.alpha = 0f; // Start invisible for fade in
         }
 
         private void Start()
@@ -41,14 +44,10 @@ namespace BecomeSisyphus.UI.Components
             FadeIn();
         }
 
-        private void Update()
+        private void OnDestroy()
         {
-            // 脉冲动画
-            if (enablePulseAnimation && !string.IsNullOrEmpty(currentText))
-            {
-                float pulse = Mathf.Sin(Time.time * pulseSpeed) * pulseIntensity;
-                canvasGroup.alpha = originalAlpha + pulse;
-            }
+            // Clean up tweens
+            pulseTween?.Kill();
         }
 
         /// <summary>
@@ -61,6 +60,12 @@ namespace BecomeSisyphus.UI.Components
             {
                 textComponent.text = text;
             }
+            
+            // Start pulse animation if enabled
+            if (enablePulseAnimation && !string.IsNullOrEmpty(currentText))
+            {
+                StartPulseAnimation();
+            }
         }
 
         /// <summary>
@@ -70,7 +75,7 @@ namespace BecomeSisyphus.UI.Components
         {
             if (canvasGroup != null)
             {
-                // LeanTween.alphaCanvas(canvasGroup, originalAlpha, fadeInDuration).setEaseOutQuart();
+                canvasGroup.DOFade(originalAlpha, fadeInDuration).SetEase(Ease.OutQuart);
             }
         }
 
@@ -81,7 +86,7 @@ namespace BecomeSisyphus.UI.Components
         {
             if (canvasGroup != null)
             {
-                // LeanTween.alphaCanvas(canvasGroup, 0f, fadeOutDuration).setEaseInQuart().setOnComplete(() => onComplete?.Invoke());
+                canvasGroup.DOFade(0f, fadeOutDuration).SetEase(Ease.InQuart).OnComplete(() => onComplete?.Invoke());
             }
         }
 
@@ -91,10 +96,45 @@ namespace BecomeSisyphus.UI.Components
         public void SetPulseAnimation(bool enabled)
         {
             enablePulseAnimation = enabled;
-            if (!enabled)
+            if (enabled && !string.IsNullOrEmpty(currentText))
             {
-                canvasGroup.alpha = originalAlpha;
+                StartPulseAnimation();
             }
+            else
+            {
+                StopPulseAnimation();
+                if (canvasGroup != null)
+                {
+                    canvasGroup.alpha = originalAlpha;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 开始脉冲动画
+        /// </summary>
+        private void StartPulseAnimation()
+        {
+            if (canvasGroup == null) return;
+            
+            StopPulseAnimation(); // Stop any existing pulse
+            
+            float minAlpha = originalAlpha - pulseIntensity;
+            float maxAlpha = originalAlpha + pulseIntensity;
+            
+            pulseTween = canvasGroup.DOFade(maxAlpha, 1f / pulseSpeed)
+                .SetEase(Ease.InOutSine)
+                .SetLoops(-1, LoopType.Yoyo)
+                .From(minAlpha);
+        }
+
+        /// <summary>
+        /// 停止脉冲动画
+        /// </summary>
+        private void StopPulseAnimation()
+        {
+            pulseTween?.Kill();
+            pulseTween = null;
         }
     }
 } 

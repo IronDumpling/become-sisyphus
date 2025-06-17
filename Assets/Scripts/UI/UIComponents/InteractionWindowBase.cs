@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using BecomeSisyphus.Core.GameStateSystem;
 
 namespace BecomeSisyphus.UI.Components
@@ -19,12 +20,14 @@ namespace BecomeSisyphus.UI.Components
         [Header("Animation Settings")]
         [SerializeField] protected float openDuration = 0.5f;
         [SerializeField] protected float closeDuration = 0.3f;
-        [SerializeField] protected AnimationCurve openCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
-        [SerializeField] protected AnimationCurve closeCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+        [SerializeField] protected Ease openEase = Ease.OutBack;
+        [SerializeField] protected Ease closeEase = Ease.InBack;
 
         protected CanvasGroup canvasGroup;
         protected Vector3 originalScale;
         protected bool isOpen = false;
+        protected Sequence openSequence;
+        protected Sequence closeSequence;
 
         protected virtual void Awake()
         {
@@ -52,6 +55,18 @@ namespace BecomeSisyphus.UI.Components
             
             // 播放开启动画
             OpenWindow();
+        }
+
+        protected virtual void OnDestroy()
+        {
+            // Clean up tweens
+            openSequence?.Kill();
+            closeSequence?.Kill();
+            
+            if (closeButton != null)
+            {
+                closeButton.onClick.RemoveAllListeners();
+            }
         }
 
         /// <summary>
@@ -96,8 +111,12 @@ namespace BecomeSisyphus.UI.Components
             windowContainer.localScale = Vector3.zero;
 
             // 播放开启动画
-            // LeanTween.alphaCanvas(canvasGroup, 1f, openDuration).setEase(openCurve);
-            // LeanTween.scale(windowContainer.gameObject, originalScale, openDuration).setEase(openCurve).setOnComplete(OnWindowOpened);
+            openSequence?.Kill();
+            openSequence = DOTween.Sequence();
+            
+            openSequence.Append(canvasGroup.DOFade(1f, openDuration * 0.3f).SetEase(Ease.OutQuart));
+            openSequence.Join(windowContainer.DOScale(originalScale, openDuration).SetEase(openEase));
+            openSequence.OnComplete(OnWindowOpened);
 
             OnWindowOpening();
         }
@@ -112,13 +131,15 @@ namespace BecomeSisyphus.UI.Components
             isOpen = false;
 
             // 播放关闭动画
-            // LeanTween.alphaCanvas(canvasGroup, 0f, closeDuration).setEase(closeCurve);
-            // LeanTween.scale(windowContainer.gameObject, Vector3.zero, closeDuration)
-            //     .setEase(closeCurve)
-            //     .setOnComplete(() => {
-            //         gameObject.SetActive(false);
-            //         OnWindowClosed();
-            //     });
+            closeSequence?.Kill();
+            closeSequence = DOTween.Sequence();
+            
+            closeSequence.Append(windowContainer.DOScale(Vector3.zero, closeDuration).SetEase(closeEase));
+            closeSequence.Join(canvasGroup.DOFade(0f, closeDuration * 0.7f).SetEase(Ease.InQuart).SetDelay(closeDuration * 0.3f));
+            closeSequence.OnComplete(() => {
+                gameObject.SetActive(false);
+                OnWindowClosed();
+            });
 
             // 切换到航行状态
             if (GameStateManager.Instance != null)
@@ -148,13 +169,5 @@ namespace BecomeSisyphus.UI.Components
         /// 窗口关闭完成回调
         /// </summary>
         protected virtual void OnWindowClosed() { }
-
-        protected virtual void OnDestroy()
-        {
-            if (closeButton != null)
-            {
-                closeButton.onClick.RemoveAllListeners();
-            }
-        }
     }
 } 

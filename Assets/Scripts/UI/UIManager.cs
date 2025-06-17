@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using BecomeSisyphus.UI.Components;
 using BecomeSisyphus.Core.GameStateSystem;
 
 namespace BecomeSisyphus.UI
@@ -253,11 +254,27 @@ namespace BecomeSisyphus.UI
             {
                 GameObject hintText = Instantiate(hintTextPrefab, hintContainer);
                 
-                // 设置文本内容
-                var textComponent = hintText.GetComponentInChildren<TMPro.TextMeshProUGUI>();
-                if (textComponent != null)
+                // 使用HintTextComponent设置文本内容
+                var hintComponent = hintText.GetComponent<HintTextComponent>();
+                if (hintComponent != null)
                 {
-                    textComponent.text = text;
+                    hintComponent.SetText(text);
+                }
+                else
+                {
+                    // 回退到直接设置TextMeshPro组件
+                    var textComponent = hintText.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+                    if (textComponent != null)
+                    {
+                        textComponent.text = text;
+                    }
+                    
+                    // 确保CanvasGroup可见
+                    var canvasGroup = hintText.GetComponent<CanvasGroup>();
+                    if (canvasGroup != null)
+                    {
+                        canvasGroup.alpha = 1f;
+                    }
                 }
 
                 activeUIComponents["HintText"] = hintText;
