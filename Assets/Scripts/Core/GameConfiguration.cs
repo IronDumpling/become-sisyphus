@@ -1,4 +1,5 @@
 using UnityEngine;
+using Unity.Cinemachine;
 using BecomeSisyphus.Core.Data;
 
 [CreateAssetMenu(menuName = "Game/GameConfiguration")]
@@ -27,6 +28,4 @@ public class GameConfiguration : ScriptableObject
     [Header("Time System")]
     public float timeScale = 1f;
     public float dayLength = 24f;
-
-    // Add more configuration fields as needed for other systems
 } 

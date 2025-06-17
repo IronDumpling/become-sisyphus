@@ -45,3 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: d2ba565ada5ba7740bc8fb59f93b8c15, type: 2}
+  cameraManagerPrefab: {fileID: 6072767240008416739, guid: 92038cf06412f0f45988c29866f31451, type: 3}

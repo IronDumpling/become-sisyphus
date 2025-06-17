@@ -1,34 +1,33 @@
 using UnityEngine;
 using BecomeSisyphus.Core.Interfaces;
 using BecomeSisyphus.Inputs.Controllers;
-using BecomeSisyphus.Core.Data;
 
 namespace BecomeSisyphus.Inputs.Commands
 {
-    // Thought Vessel Interface Commands
-    public class CloseVesselUICommand : ICommand
+    public class SwitchVesselModeCommand : ICommand
     {
-        private VesselUIController controller;
+        private readonly ThoughtVesselController controller;
+        private readonly ThoughtVesselController.VesselUIMode mode;
 
-        public CloseVesselUICommand(VesselUIController controller)
+        public SwitchVesselModeCommand(ThoughtVesselController controller, ThoughtVesselController.VesselUIMode mode)
         {
             this.controller = controller;
+            this.mode = mode;
         }
 
         public void Execute()
         {
-            controller.CloseVesselUI();
-            // TODO: Determine the state to return to (e.g., InsideWorld/Sailing)
-            Debug.Log("Thought Vessel UI: Closing");
+            controller.SwitchMode(mode);
+            Debug.Log($"Vessel UI: Switching to {mode} mode");
         }
     }
 
-    public class SelectVesselGridCommand : ICommand
+    public class SelectGridCommand : ICommand
     {
-        private VesselUIController controller;
-        private Vector2Int direction;
+        private readonly ThoughtVesselController controller;
+        private readonly Vector2Int direction;
 
-        public SelectVesselGridCommand(VesselUIController controller, Vector2Int direction)
+        public SelectGridCommand(ThoughtVesselController controller, Vector2Int direction)
         {
             this.controller = controller;
             this.direction = direction;
@@ -37,35 +36,32 @@ namespace BecomeSisyphus.Inputs.Commands
         public void Execute()
         {
             controller.SelectGrid(direction);
-            Debug.Log($"Thought Vessel UI: Selecting grid at {direction}");
+            Debug.Log($"Vessel UI: Selecting grid at {direction}");
         }
     }
 
-    public class SelectCargoInVesselCommand : ICommand
+    public class SelectCargoCommand : ICommand
     {
-        private VesselUIController controller;
-        // Potentially pass the selected cargo if known, or let controller determine
+        private readonly ThoughtVesselController controller;
 
-        public SelectCargoInVesselCommand(VesselUIController controller)
+        public SelectCargoCommand(ThoughtVesselController controller)
         {
             this.controller = controller;
         }
 
         public void Execute()
         {
-            // Assuming controller handles finding the cargo at the selected grid
-            // For now, let's just assume it tries to select *some* cargo.
-            controller.SelectCargo(null); // TODO: Pass actual cargo
-            Debug.Log("Thought Vessel UI: Selecting cargo");
+            controller.SelectCargo();
+            Debug.Log("Vessel UI: Selecting cargo");
         }
     }
 
-    public class MoveCargoInVesselCommand : ICommand
+    public class MoveCargoCommand : ICommand
     {
-        private VesselUIController controller;
-        private Vector2Int direction;
+        private readonly ThoughtVesselController controller;
+        private readonly Vector2Int direction;
 
-        public MoveCargoInVesselCommand(VesselUIController controller, Vector2Int direction)
+        public MoveCargoCommand(ThoughtVesselController controller, Vector2Int direction)
         {
             this.controller = controller;
             this.direction = direction;
@@ -74,15 +70,15 @@ namespace BecomeSisyphus.Inputs.Commands
         public void Execute()
         {
             controller.MoveCargo(direction);
-            Debug.Log($"Thought Vessel UI: Moving cargo {direction}");
+            Debug.Log($"Vessel UI: Moving cargo {direction}");
         }
     }
 
-    public class RotateCargoInVesselCommand : ICommand
+    public class RotateCargoCommand : ICommand
     {
-        private VesselUIController controller;
+        private readonly ThoughtVesselController controller;
 
-        public RotateCargoInVesselCommand(VesselUIController controller)
+        public RotateCargoCommand(ThoughtVesselController controller)
         {
             this.controller = controller;
         }
@@ -90,15 +86,15 @@ namespace BecomeSisyphus.Inputs.Commands
         public void Execute()
         {
             controller.RotateCargo();
-            Debug.Log("Thought Vessel UI: Rotating cargo");
+            Debug.Log("Vessel UI: Rotating cargo");
         }
     }
 
     public class ExitCargoSelectionCommand : ICommand
     {
-        private VesselUIController controller;
+        private readonly ThoughtVesselController controller;
 
-        public ExitCargoSelectionCommand(VesselUIController controller)
+        public ExitCargoSelectionCommand(ThoughtVesselController controller)
         {
             this.controller = controller;
         }
@@ -106,7 +102,77 @@ namespace BecomeSisyphus.Inputs.Commands
         public void Execute()
         {
             controller.ExitCargoSelection();
-            Debug.Log("Thought Vessel UI: Exiting cargo selection");
+            Debug.Log("Vessel UI: Exiting cargo selection");
+        }
+    }
+
+    public class SelectConfusionCommand : ICommand
+    {
+        private readonly ThoughtVesselController controller;
+        private readonly int direction;
+
+        public SelectConfusionCommand(ThoughtVesselController controller, int direction)
+        {
+            this.controller = controller;
+            this.direction = direction;
+        }
+
+        public void Execute()
+        {
+            controller.SelectConfusion(direction);
+            Debug.Log($"Vessel UI: Selecting confusion {direction}");
+        }
+    }
+
+    public class SelectAbilityCommand : ICommand
+    {
+        private readonly ThoughtVesselController controller;
+        private readonly int direction;
+
+        public SelectAbilityCommand(ThoughtVesselController controller, int direction)
+        {
+            this.controller = controller;
+            this.direction = direction;
+        }
+
+        public void Execute()
+        {
+            controller.SelectAbility(direction);
+            Debug.Log($"Vessel UI: Selecting ability {direction}");
+        }
+    }
+
+    public class MoveMapCommand : ICommand
+    {
+        private readonly ThoughtVesselController controller;
+        private readonly Vector2 direction;
+
+        public MoveMapCommand(ThoughtVesselController controller, Vector2 direction)
+        {
+            this.controller = controller;
+            this.direction = direction;
+        }
+
+        public void Execute()
+        {
+            controller.MoveMap(direction);
+            Debug.Log($"Vessel UI: Moving map {direction}");
+        }
+    }
+
+    public class CloseVesselUICommand : ICommand
+    {
+        private readonly ThoughtVesselController controller;
+
+        public CloseVesselUICommand(ThoughtVesselController controller)
+        {
+            this.controller = controller;
+        }
+
+        public void Execute()
+        {
+            controller.CloseVesselUI();
+            Debug.Log("Vessel UI: Closing");
         }
     }
 } 

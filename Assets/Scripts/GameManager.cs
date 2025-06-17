@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using BecomeSisyphus.Core;
-using BecomeSisyphus.Systems;
+using BecomeSisyphus.Managers.Systems;
 using BecomeSisyphus.Core.Interfaces;
 
 namespace BecomeSisyphus
@@ -15,7 +15,7 @@ namespace BecomeSisyphus
         private Dictionary<System.Type, ISystem> systems = new Dictionary<System.Type, ISystem>();
         
         [SerializeField] private GameConfiguration config;
-        
+
         private void Awake()
         {
             if (Instance == null)
@@ -37,8 +37,7 @@ namespace BecomeSisyphus
             CreateSystemBehaviour<SisyphusMindSystemBehaviour>("SisyphusMindSystemBehaviour");
             CreateSystemBehaviour<ConfusionSystemBehaviour>("ConfusionSystemBehaviour");
             CreateSystemBehaviour<ThoughtVesselSystemBehaviour>("ThoughtVesselSystemBehaviour");
-            CreateSystemBehaviour<LogbookSystemBehaviour>("LogbookSystemBehaviour");
-            CreateSystemBehaviour<MindSeaSystemBehaviour>("MindSeaSystemBehaviour");
+            CreateSystemBehaviour<MindOceanSystemBehaviour>("MindOceanSystemBehaviour");
             CreateSystemBehaviour<MemorySystemBehaviour>("MemorySystemBehaviour");
             CreateSystemBehaviour<ExplorationSystemBehaviour>("ExplorationSystemBehaviour");
             CreateSystemBehaviour<SignifierSystemBehaviour>("SignifierSystemBehaviour");
@@ -55,16 +54,34 @@ namespace BecomeSisyphus
         private void InitializeSystems()
         {
             // Use config to initialize each system with parameters
-            RegisterSystem(new SisyphusManager(config.managerMentalStrength, config.managerMaxBrainCapacity, config.managerMentalStrengthRegenRate));
-            RegisterSystem(new SisyphusMindSystem(config.maxMentalStrength, config.mentalStrengthRegenRate, config.mentalStrengthRegenDelay));
-            RegisterSystem(new ConfusionSystem(config.confusionGenerationInterval, config.temporaryConfusionDuration));
-            RegisterSystem(new ThoughtVesselSystem(config.initialRows, config.initialColumns, config.loadRatioThreshold, config.mentalStrengthConsumptionRate));
+            RegisterSystem(new SisyphusManager(
+                config.managerMentalStrength, 
+                config.managerMaxBrainCapacity, 
+                config.managerMentalStrengthRegenRate
+            ));
+            RegisterSystem(new SisyphusMindSystem(
+                config.maxMentalStrength, 
+                config.mentalStrengthRegenRate, 
+                config.mentalStrengthRegenDelay
+            ));
+            RegisterSystem(new ConfusionSystem(
+                config.confusionGenerationInterval, 
+                config.temporaryConfusionDuration
+            ));
+            RegisterSystem(new ThoughtVesselSystem(
+                config.initialRows, 
+                config.initialColumns, 
+                config.loadRatioThreshold, 
+                config.mentalStrengthConsumptionRate
+            ));
             RegisterSystem(new MemorySystem());
             RegisterSystem(new ExplorationSystem());
-            RegisterSystem(new LogbookSystem());
-            RegisterSystem(new MindSeaSystem());
+            RegisterSystem(new MindOceanSystem());
             RegisterSystem(new SignifierSystem());
-            RegisterSystem(new TimeSystem(config.timeScale, config.dayLength));
+            RegisterSystem(new TimeSystem(
+                config.timeScale, 
+                config.dayLength
+            ));
         }
 
         private void RegisterSystem(ISystem system)

@@ -150,7 +150,7 @@
             ]
         },
         {
-            "name": "Logbook",
+            "name": "BoatSailing",
             "id": "3ce2e5bd-0aab-4e73-9eaa-afc404d6c1de",
             "actions": [
                 {
@@ -167,6 +167,34 @@
                 {
                     "name": "",
                     "id": "84394469-ab68-4704-969e-fdafe8ca4be6",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "New action",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "BoatInteraction",
+            "id": "d6757167-155e-46ca-96ed-0e846741dc0b",
+            "actions": [
+                {
+                    "name": "New action",
+                    "type": "Button",
+                    "id": "07aa657c-c9f8-4fac-91b6-ae05969b401b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "a109c8ab-b504-4602-8f1c-d0193375a1d1",
                     "path": "",
                     "interactions": "",
                     "processors": "",

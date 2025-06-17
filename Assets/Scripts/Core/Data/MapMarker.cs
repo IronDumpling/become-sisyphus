@@ -10,13 +10,22 @@ namespace BecomeSisyphus.Core.Data
         public MarkerType type;
         public Vector3 position;
         public string description;
+        public bool isDiscovered;
+        public bool isActive;
+        public float radius;
+        public string linkedEntityId; // 关联的实体ID（记忆、能指等）
     }
 
     public enum MarkerType
     {
-        Signifier,
-        Memory,
-        Solution,
-        Treasure
+        Lighthouse,  // 灯塔
+        Harbor,      // 港口
+        Island,      // 小岛（已发现的能指）
+        Cloud,       // 云（已发现的记忆）
+        Salvage,     // 打捞点
+        Hazard,       // 危险
+        Memory,      // 记忆
+        Solution,    // 解答
+        Treasure     // 宝藏
     }
 } 
