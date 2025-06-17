@@ -4,16 +4,15 @@ using System.Linq;
 using System.Collections.Generic;
 
 using BecomeSisyphus.Core;
-using BecomeSisyphus.Managers.Systems;
+using BecomeSisyphus.Core.GameStateSystem;
 using BecomeSisyphus.Core.Interfaces;
+using BecomeSisyphus.Managers.Systems;
 
 namespace BecomeSisyphus
 {
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
-        
-        public GameState CurrentState { get; private set; }
         
         private Dictionary<System.Type, ISystem> systems = new Dictionary<System.Type, ISystem>();
         
@@ -65,6 +64,7 @@ namespace BecomeSisyphus
             // 基础系统先初始化
             RegisterSystem(new TimeSystem(config.timeScale, config.dayLength));
             RegisterSystem(new CameraSystem());
+            RegisterSystem(new BecomeSisyphus.Core.GameStateSystem.GameStateManager());
             
             // 核心游戏系统
             RegisterSystem(new SisyphusManager(
@@ -121,12 +121,6 @@ namespace BecomeSisyphus
             // Debug.LogError($"GameManager: System not found: {typeof(T).Name}");
             // Debug.LogError($"GameManager: Available systems: {string.Join(", ", systems.Keys.Select(k => k.Name))}");
             return default;
-        }
-
-        public void ChangeState(GameState newState)
-        {
-            CurrentState = newState;
-            // 在这里处理状态切换逻辑
         }
 
         private void Update()

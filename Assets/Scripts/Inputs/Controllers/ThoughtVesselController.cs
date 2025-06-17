@@ -1,5 +1,6 @@
 using UnityEngine;
 using BecomeSisyphus.Core;
+using BecomeSisyphus.Core.GameStateSystem;
 using BecomeSisyphus.Managers.Systems;
 
 namespace BecomeSisyphus.Inputs.Controllers
@@ -98,7 +99,15 @@ namespace BecomeSisyphus.Inputs.Controllers
         public void CloseVesselUI()
         {
             Debug.Log("Closing Vessel UI");
-            GameManager.Instance.ChangeState(GameState.Sailing);
+            var stateManager = BecomeSisyphus.Core.GameStateSystem.GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                stateManager.SwitchToState("InsideGame/InsideWorld/Sailing");
+            }
+            else
+            {
+                Debug.LogError("GameStateManager not found! Cannot close vessel UI properly.");
+            }
             // TODO: 实现UI关闭逻辑
         }
     }

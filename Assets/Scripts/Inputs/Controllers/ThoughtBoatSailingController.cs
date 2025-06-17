@@ -1,6 +1,7 @@
 using UnityEngine;
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Core.Data;
+using BecomeSisyphus.Core.GameStateSystem;
 using BecomeSisyphus.Managers.Systems;
 
 namespace BecomeSisyphus.Inputs.Controllers
@@ -120,25 +121,54 @@ namespace BecomeSisyphus.Inputs.Controllers
         public void OpenVesselUI()
         {
             Debug.Log("Opening vessel UI");
-            GameManager.Instance.ChangeState(GameState.Vessel);
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                stateManager.SwitchToState("InsideGame/InsideWorld/ThoughtBoatCabin/ThoughtVessel");
+            }
+            else
+            {
+                Debug.LogError("GameStateManager not found! Cannot open vessel UI properly.");
+            }
         }
 
         public void OpenNavigationMap()
         {
             Debug.Log("Opening navigation map");
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                stateManager.SwitchToState("InsideGame/InsideWorld/ThoughtBoatCabin/NavigationMap");
+            }
             // TODO: 实现航海图界面
         }
 
         public void OpenTelescope()
         {
             Debug.Log("Opening telescope");
-            GameManager.Instance.ChangeState(GameState.Telescope);
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                stateManager.SwitchToState("InsideGame/InsideWorld/Telescope");
+            }
+            else
+            {
+                Debug.LogError("GameStateManager not found! Cannot open telescope properly.");
+            }
         }
 
         public void SwitchToOutsideWorld()
         {
             Debug.Log("Switching to outside world");
-            GameManager.Instance.ChangeState(GameState.Climbing);
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                stateManager.SwitchToState("InsideGame/OutsideWorld/Climbing");
+            }
+            else
+            {
+                Debug.LogError("GameStateManager not found! Cannot switch to outside world properly.");
+            }
         }
     }
 }
