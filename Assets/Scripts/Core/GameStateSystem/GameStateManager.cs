@@ -159,7 +159,8 @@ namespace BecomeSisyphus.Core.GameStateSystem
             currentRootState.OnEnter(previousState);
             OnStateEntered?.Invoke(currentRootState);
             
-            // 触发状态转换事件
+            // 更新最后活跃状态并触发状态转换事件
+            _lastActiveState = currentRootState.GetActiveLeafState();
             OnStateTransition?.Invoke(previousState, currentRootState);
             
             Debug.Log($"GameStateManager: Switched from {previousState?.StateName ?? "null"} to {stateName}");
@@ -217,10 +218,18 @@ namespace BecomeSisyphus.Core.GameStateSystem
         {
             Debug.Log($"GameStateManager: State changed to {newState.GetFullStatePath()}");
             
+            // 触发状态转换事件
+            var previousActiveState = _lastActiveState;
+            _lastActiveState = newState;
+            OnStateTransition?.Invoke(previousActiveState, newState);
+            
             // 这里可以添加全局状态变化处理逻辑
             // 比如通知InputManager、CameraSystem等
             NotifySystemsOfStateChange(newState);
         }
+
+        // 添加字段来跟踪上一个活跃状态
+        private IGameState _lastActiveState;
 
         /// <summary>
         /// 通知其他系统状态变化
