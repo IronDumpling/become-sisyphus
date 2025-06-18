@@ -29,7 +29,6 @@ namespace BecomeSisyphus.Managers.Systems
         {
             mindSystem = GameManager.Instance.GetSystem<SisyphusMindSystem>();
             LoadInitialRegions();
-            // LoadInitialInteractionPoints(); // Commented out - interaction points will be registered by scene objects
         }
 
         public void Update()
@@ -37,7 +36,6 @@ namespace BecomeSisyphus.Managers.Systems
             UpdateCurrentRegion();
             CheckHazards();
             UpdateMarkers();
-            UpdateInteractionPoints();
         }
 
         public void Navigate(Vector3 direction)
@@ -58,10 +56,10 @@ namespace BecomeSisyphus.Managers.Systems
                 currentPosition = position;
                 OnPositionChanged?.Invoke(currentPosition);
                 
-                // Debug position updates occasionally
+                // Debug position updates occasionally (simplified for trigger system)
                 if (Vector3.Distance(oldPosition, currentPosition) > 1f || Time.frameCount % 120 == 0)
                 {
-                    Debug.Log($"[MindOceanSystem] 📍 Position updated to {currentPosition}, nearby points: {interactionPoints.Count}");
+                    Debug.Log($"[MindOceanSystem] 📍 Position updated to {currentPosition}");
                 }
             }
         }
@@ -251,51 +249,51 @@ namespace BecomeSisyphus.Managers.Systems
             return discovered;
         }
 
-        private void UpdateInteractionPoints()
+        // Removed UpdateInteractionPoints() - now using Trigger system
+        
+        /// <summary>
+        /// Called by trigger system when boat enters interaction range
+        /// </summary>
+        public void OnInteractionPointTriggered(InteractionPoint point)
         {
-            InteractionPoint closestPoint = null;
-            float closestDistance = float.MaxValue;
-
-            // Find the closest interaction point within range
-            foreach (var point in interactionPoints.Values)
+            if (point != null && point.isActive)
             {
-                if (!point.isActive) continue;
-
-                float distance = Vector3.Distance(currentPosition, point.position);
-                
-                // Discover point if within range and not yet discovered
-                if (!point.isDiscovered && distance <= point.interactionRadius * 2f)
+                // Discover point if not yet discovered
+                if (!point.isDiscovered)
                 {
                     point.isDiscovered = true;
                     OnInteractionPointDiscovered?.Invoke(point);
-                    Debug.Log($"MindOceanSystem: Discovered interaction point {point.id} ({point.type})");
+                    Debug.Log($"[MindOceanSystem] 🔍 Discovered interaction point {point.id} ({point.type})");
                 }
 
-                // Check for closest point within interaction range
-                if (distance <= point.interactionRadius && distance < closestDistance)
+                // Set as nearby point
+                if (nearbyInteractionPoint != point)
                 {
-                    closestPoint = point;
-                    closestDistance = distance;
+                    // Exit previous interaction point
+                    if (nearbyInteractionPoint != null)
+                    {
+                        OnInteractionPointExited?.Invoke(nearbyInteractionPoint);
+                        Debug.Log($"[MindOceanSystem] ⬅️ Exited interaction range of {nearbyInteractionPoint.id} ({nearbyInteractionPoint.type})");
+                    }
+
+                    // Enter new interaction point
+                    nearbyInteractionPoint = point;
+                    OnInteractionPointEntered?.Invoke(nearbyInteractionPoint);
+                    Debug.Log($"[MindOceanSystem] ➡️ Entered interaction range of {nearbyInteractionPoint.id} ({nearbyInteractionPoint.type})");
                 }
             }
-
-            // Handle nearby interaction point changes
-            if (closestPoint != nearbyInteractionPoint)
+        }
+        
+        /// <summary>
+        /// Called by trigger system when boat exits interaction range
+        /// </summary>
+        public void HandleInteractionPointExit(InteractionPoint point)
+        {
+            if (point != null && nearbyInteractionPoint == point)
             {
-                // Exit previous interaction point
-                if (nearbyInteractionPoint != null)
-                {
-                    OnInteractionPointExited?.Invoke(nearbyInteractionPoint);
-                    Debug.Log($"[MindOceanSystem] ⬅️ Exited interaction range of {nearbyInteractionPoint.id} ({nearbyInteractionPoint.type})");
-                }
-
-                // Enter new interaction point
-                nearbyInteractionPoint = closestPoint;
-                if (nearbyInteractionPoint != null)
-                {
-                    OnInteractionPointEntered?.Invoke(nearbyInteractionPoint);
-                    Debug.Log($"[MindOceanSystem] ➡️ Entered interaction range of {nearbyInteractionPoint.id} ({nearbyInteractionPoint.type}) - Distance: {closestDistance:F2}");
-                }
+                OnInteractionPointExited?.Invoke(nearbyInteractionPoint);
+                Debug.Log($"[MindOceanSystem] ⬅️ Exited interaction range of {nearbyInteractionPoint.id} ({nearbyInteractionPoint.type})");
+                nearbyInteractionPoint = null;
             }
         }
 

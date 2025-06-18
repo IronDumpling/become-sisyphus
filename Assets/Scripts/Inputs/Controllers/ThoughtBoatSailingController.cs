@@ -7,6 +7,11 @@ using DG.Tweening;
 
 namespace BecomeSisyphus.Inputs.Controllers
 {
+    /// <summary>
+    /// 船只航行控制器 - 包含移动控制和交互触发检测
+    /// 需要配置SphereCollider (IsTrigger = true) 用于交互检测
+    /// </summary>
+    [RequireComponent(typeof(Collider))]
     public class ThoughtBoatSailingController : MonoBehaviour
     {
         [Header("Movement Settings")]
@@ -107,6 +112,17 @@ namespace BecomeSisyphus.Inputs.Controllers
                     Debug.LogWarning("ThoughtBoatSailingController: GameManager exists but ThoughtBoatSystem not found. Check if ThoughtBoatSystem is properly registered in GameManager.InitializeSystems()");
                 }
             }
+            
+            // Ensure we have a trigger collider for interaction detection
+            var collider = GetComponent<Collider>();
+            if (collider != null && !collider.isTrigger)
+            {
+                Debug.LogWarning("[ThoughtBoatSailingController] Collider should be set as Trigger for interaction detection!");
+            }
+            else if (collider == null)
+            {
+                Debug.LogError("[ThoughtBoatSailingController] No Collider found! Please add a SphereCollider with IsTrigger = true");
+            }
         }
 
         private void Update()
@@ -124,7 +140,7 @@ namespace BecomeSisyphus.Inputs.Controllers
                 Vector3 deltaPosition = new Vector3(currentVelocity.x, currentVelocity.y, 0) * Time.deltaTime;
                 transform.position += deltaPosition;
                 
-                // Update position in MindOceanSystem
+                // Update position in MindOceanSystem (simplified for trigger system)
                 UpdatePositionInMindOcean();
             }
         }
@@ -243,20 +259,128 @@ namespace BecomeSisyphus.Inputs.Controllers
 
         public void OpenIslandInteraction(string islandId)
         {
-            Debug.Log($"Opening island interaction for: {islandId}");
-            // TODO: 实现小岛交互界面
+            Debug.Log($"[ThoughtBoatSailingController] 🏝️ Opening island interaction for: {islandId}");
+            
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                // Switch to island interaction state (using Interaction/Harbour as template for now)
+                Debug.Log($"[ThoughtBoatSailingController] Switching to island interaction state");
+                stateManager.SwitchToState("InsideGame/InsideWorld/Interaction/Harbour");
+                
+                // Get interaction point data and pass to UI
+                if (mindOceanSystem != null)
+                {
+                    var interactionPoint = mindOceanSystem.GetInteractionPoint(islandId);
+                    if (interactionPoint != null)
+                    {
+                        Debug.Log($"[ThoughtBoatSailingController] Found interaction point: {interactionPoint.title}");
+                        // Find and configure the harbor window (reusing for island for now)
+                        var harborWindow = FindAnyObjectByType<BecomeSisyphus.UI.Components.HarbourInteractionWindow>();
+                        if (harborWindow != null)
+                        {
+                            harborWindow.SetInteractionPoint(interactionPoint);
+                            Debug.Log($"[ThoughtBoatSailingController] ✅ Configured harbor window for island interaction");
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"[ThoughtBoatSailingController] ⚠️ HarbourInteractionWindow not found!");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[ThoughtBoatSailingController] ⚠️ Interaction point {islandId} not found in MindOceanSystem!");
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogError("[ThoughtBoatSailingController] ❌ GameStateManager not found! Cannot open island interaction properly.");
+            }
         }
 
         public void OpenSalvageInteraction(string salvageId)
         {
-            Debug.Log($"Opening salvage interaction for: {salvageId}");
-            // TODO: 实现打捞点交互界面
+            Debug.Log($"[ThoughtBoatSailingController] ⚓ Opening salvage interaction for: {salvageId}");
+            
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                // Switch to salvage interaction state (using Interaction/Harbour as template for now)
+                Debug.Log($"[ThoughtBoatSailingController] Switching to salvage interaction state");
+                stateManager.SwitchToState("InsideGame/InsideWorld/Interaction/Harbour");
+                
+                // Get interaction point data and pass to UI
+                if (mindOceanSystem != null)
+                {
+                    var interactionPoint = mindOceanSystem.GetInteractionPoint(salvageId);
+                    if (interactionPoint != null)
+                    {
+                        Debug.Log($"[ThoughtBoatSailingController] Found interaction point: {interactionPoint.title}");
+                        // Find and configure the harbor window (reusing for salvage for now)
+                        var harborWindow = FindAnyObjectByType<BecomeSisyphus.UI.Components.HarbourInteractionWindow>();
+                        if (harborWindow != null)
+                        {
+                            harborWindow.SetInteractionPoint(interactionPoint);
+                            Debug.Log($"[ThoughtBoatSailingController] ✅ Configured harbor window for salvage interaction");
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"[ThoughtBoatSailingController] ⚠️ HarbourInteractionWindow not found!");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[ThoughtBoatSailingController] ⚠️ Interaction point {salvageId} not found in MindOceanSystem!");
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogError("[ThoughtBoatSailingController] ❌ GameStateManager not found! Cannot open salvage interaction properly.");
+            }
         }
 
         private void OpenLighthouseInteraction(string lighthouseId)
         {
-            Debug.Log($"Opening lighthouse interaction for: {lighthouseId}");
-            // TODO: 实现灯塔交互界面
+            Debug.Log($"[ThoughtBoatSailingController] 🗼 Opening lighthouse interaction for: {lighthouseId}");
+            
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                // Switch to lighthouse interaction state (using Interaction/Lighthouse as template for now)
+                Debug.Log($"[ThoughtBoatSailingController] Switching to lighthouse interaction state");
+                stateManager.SwitchToState("InsideGame/InsideWorld/Interaction/Lighthouse");
+                
+                // Get interaction point data and pass to UI
+                if (mindOceanSystem != null)
+                {
+                    var interactionPoint = mindOceanSystem.GetInteractionPoint(lighthouseId);
+                    if (interactionPoint != null)
+                    {
+                        Debug.Log($"[ThoughtBoatSailingController] Found interaction point: {interactionPoint.title}");
+                        // Find and configure the harbor window (reusing for lighthouse for now)
+                        var harborWindow = FindAnyObjectByType<BecomeSisyphus.UI.Components.HarbourInteractionWindow>();
+                        if (harborWindow != null)
+                        {
+                            harborWindow.SetInteractionPoint(interactionPoint);
+                            Debug.Log($"[ThoughtBoatSailingController] ✅ Configured harbor window for lighthouse interaction");
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"[ThoughtBoatSailingController] ⚠️ HarbourInteractionWindow not found!");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[ThoughtBoatSailingController] ⚠️ Interaction point {lighthouseId} not found in MindOceanSystem!");
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogError("[ThoughtBoatSailingController] ❌ GameStateManager not found! Cannot open lighthouse interaction properly.");
+            }
         }
 
         private void OpenHarborInteraction(string harborId)
@@ -276,7 +400,7 @@ namespace BecomeSisyphus.Inputs.Controllers
                     if (interactionPoint != null)
                     {
                         // Find and configure the harbor window
-                        var harborWindow = FindObjectOfType<BecomeSisyphus.UI.Components.HarbourInteractionWindow>();
+                        var harborWindow = FindAnyObjectByType<BecomeSisyphus.UI.Components.HarbourInteractionWindow>();
                         if (harborWindow != null)
                         {
                             harborWindow.SetInteractionPoint(interactionPoint);
@@ -426,16 +550,7 @@ namespace BecomeSisyphus.Inputs.Controllers
                 }
                 else
                 {
-                    Debug.Log("[ThoughtBoatSailingController] ❌ No nearby interaction point found");
-                    // Debug: Show all available points and distances
-                    var allPoints = mindOceanSystem.GetAllInteractionPoints();
-                    Debug.Log($"[ThoughtBoatSailingController] 📍 Available interaction points: {allPoints.Count}");
-                    Vector3 boatPosition = transform.position;
-                    foreach (var point in allPoints)
-                    {
-                        float distance = Vector3.Distance(boatPosition, point.position);
-                        Debug.Log($"  - {point.id} ({point.type}) at distance {distance:F2} (radius: {point.interactionRadius}, active: {point.isActive})");
-                    }
+                    Debug.Log("[ThoughtBoatSailingController] ❌ No nearby interaction point found (using trigger system)");
                 }
             }
             else
@@ -446,10 +561,13 @@ namespace BecomeSisyphus.Inputs.Controllers
 
         private void InteractWithPoint(InteractionPoint point)
         {
-            Debug.Log($"ThoughtBoatSailingController: Interacting with {point.title} ({point.type})");
+            Debug.Log($"[ThoughtBoatSailingController] 🎯 Interacting with {point.title} ({point.type})");
             
             // Convert to legacy InteractionType and call OpenInteraction
             var legacyType = ConvertToLegacyInteractionType(point.type);
+            Debug.Log($"[ThoughtBoatSailingController] Converting {point.type} to legacy type: {legacyType}");
+            
+            Debug.Log($"[ThoughtBoatSailingController] Calling OpenInteraction({legacyType}, {point.id})");
             OpenInteraction(legacyType, point.id);
         }
 
@@ -467,6 +585,69 @@ namespace BecomeSisyphus.Inputs.Controllers
                 InteractionPointType.TreasureSpot => InteractionType.Salvage, // Use salvage UI for now
                 _ => InteractionType.Island
             };
+        }
+
+        // ========== INTERACTION TRIGGER DETECTION (3D) ==========
+        
+        /// <summary>
+        /// 3D触发器进入检测 - 检测与交互点的碰撞
+        /// </summary>
+        private void OnTriggerEnter(Collider other)
+        {
+            Debug.Log($"[ThoughtBoatSailingController] 🔍 OnTriggerEnter called with object: {other.name} (Layer: {other.gameObject.layer})");
+            
+            // Check if we hit an interaction point
+            var interactionPointBehaviour = other.GetComponent<InteractionPointBehaviour>();
+            if (interactionPointBehaviour != null)
+            {
+                Debug.Log($"[ThoughtBoatSailingController] ✅ Found InteractionPointBehaviour on {other.name}");
+                
+                if (mindOceanSystem != null)
+                {
+                    string interactionId = interactionPointBehaviour.GetInteractionId();
+                    Debug.Log($"[ThoughtBoatSailingController] 🔍 Looking for interaction point with ID: {interactionId}");
+                    
+                    // Get the interaction point data
+                    var interactionPoint = mindOceanSystem.GetInteractionPoint(interactionId);
+                    if (interactionPoint != null)
+                    {
+                        Debug.Log($"[ThoughtBoatSailingController] 🎯 Entered trigger for {interactionPoint.title} ({interactionPoint.type})");
+                        mindOceanSystem.OnInteractionPointTriggered(interactionPoint);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[ThoughtBoatSailingController] ❌ InteractionPoint not found for ID: {interactionId}");
+                        Debug.LogWarning($"[ThoughtBoatSailingController] Available interaction points: {string.Join(", ", mindOceanSystem.GetAllInteractionPoints().ConvertAll(p => p.id))}");
+                    }
+                }
+                else
+                {
+                    Debug.LogError($"[ThoughtBoatSailingController] ❌ mindOceanSystem is null!");
+                }
+            }
+            else
+            {
+                Debug.Log($"[ThoughtBoatSailingController] ❌ No InteractionPointBehaviour found on {other.name}");
+            }
+        }
+        
+        /// <summary>
+        /// 3D触发器退出检测 - 检测离开交互点
+        /// </summary>
+        private void OnTriggerExit(Collider other)
+        {
+            // Check if we left an interaction point
+            var interactionPointBehaviour = other.GetComponent<InteractionPointBehaviour>();
+            if (interactionPointBehaviour != null && mindOceanSystem != null)
+            {
+                // Get the interaction point data
+                var interactionPoint = mindOceanSystem.GetInteractionPoint(interactionPointBehaviour.GetInteractionId());
+                if (interactionPoint != null)
+                {
+                    Debug.Log($"[ThoughtBoatSailingController] 🚪 Exited trigger for {interactionPoint.title} ({interactionPoint.type})");
+                    mindOceanSystem.HandleInteractionPointExit(interactionPoint);
+                }
+            }
         }
 
         private void OnDestroy()

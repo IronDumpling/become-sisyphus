@@ -16,7 +16,6 @@ namespace BecomeSisyphus.UI
         [SerializeField] private string progressBarPrefabPath = "Prefabs/UI/ProgressBar";
         [SerializeField] private string timePrefabPath = "Prefabs/UI/Time";
         [SerializeField] private string hintTextPrefabPath = "Prefabs/UI/HintText";
-        [SerializeField] private string keyHintsPrefabPath = "Prefabs/UI/KeyHints";
         [SerializeField] private string harbourWindowPrefabPath = "Prefabs/UI/HarbourWindow";
         [SerializeField] private string lighthouseWindowPrefabPath = "Prefabs/UI/LighthouseWindow";
         [SerializeField] private string salvageWindowPrefabPath = "Prefabs/UI/SalvageWindow";

@@ -245,7 +245,12 @@ namespace BecomeSisyphus.Core.GameStateSystem
                 var actionMapName = DetermineActionMapForState(newState);
                 if (!string.IsNullOrEmpty(actionMapName))
                 {
+                    Debug.Log($"[GameStateManager] Switching to ActionMap: {actionMapName} for state: {newState.GetFullStatePath()}");
                     BecomeSisyphus.Inputs.InputManager.Instance.SwitchActionMap(actionMapName);
+                }
+                else
+                {
+                    Debug.LogWarning($"[GameStateManager] No ActionMap determined for state: {newState.GetFullStatePath()}");
                 }
             }
 
@@ -326,13 +331,14 @@ namespace BecomeSisyphus.Core.GameStateSystem
         {
             var statePath = state.GetFullStatePath();
             
+            Debug.Log($"[GameStateManager] DetermineActionMapForState: statePath = {statePath}");
+            
+            // Check specific states first, then general ones
             if (statePath.Contains("MainMenu"))
                 return "MainTitle";
             else if (statePath.Contains("OutsideWorld"))
                 return "OutsideWorld";
-            else if (statePath.Contains("InsideWorld"))
-                return "InsideWorld";
-            else if (statePath.Contains("Sailing"))
+            else if (statePath.Contains("Sailing"))  // ✅ Check specific states first!
                 return "BoatSailing";
             else if (statePath.Contains("Interaction"))
                 return "BoatInteraction";
@@ -340,7 +346,10 @@ namespace BecomeSisyphus.Core.GameStateSystem
                 return "ThoughtVessel";
             else if (statePath.Contains("Telescope"))
                 return "Telescope";
+            else if (statePath.Contains("InsideWorld"))  // ✅ General InsideWorld check last
+                return "InsideWorld";
                 
+            Debug.LogWarning($"[GameStateManager] No ActionMap found for state: {statePath}");
             return null;
         }
 

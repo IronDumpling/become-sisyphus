@@ -197,6 +197,9 @@ namespace BecomeSisyphus.Inputs
             sailingMoveBoatCommand = new MoveBoatCommand(thoughtBoatSailingController, Vector2.zero);
             RegisterCommand("MoveBoat", sailingMoveBoatCommand);
             RegisterCommand("EnterOutsideWorld", new EnterOutsideWorldFromInsideCommand());
+            
+            // Add StartSailing command for Esc key in sailing mode
+            RegisterCommand("StartSailing", new CloseInteractionCommand());
 
             // Unified interaction command for nearby points
             RegisterCommand("InteractWithNearbyPoint", new InteractWithNearbyPointCommand(thoughtBoatSailingController));
@@ -211,7 +214,13 @@ namespace BecomeSisyphus.Inputs
 
         private void RegisterBoatInteractionCommands()
         {
-
+            Debug.Log("InputManager: Registering BoatInteraction commands...");
+            
+            // Add StartSailing command for Esc key in interaction mode
+            RegisterCommand("StartSailing", new CloseInteractionCommand());
+            RegisterCommand("EnterOutsideWorld", new EnterOutsideWorldFromInsideCommand());
+            
+            Debug.Log("InputManager: Finished registering BoatInteraction commands");
         }
 
         private void RegisterThoughtVesselCommands()
