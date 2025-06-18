@@ -151,7 +151,6 @@ namespace BecomeSisyphus.Inputs.Commands
 
         public void Execute()
         {
-            Debug.Log("[InteractWithNearbyPointCommand] 🚀 Execute() called");
             
             var stateManager = BecomeSisyphus.Core.GameStateSystem.GameStateManager.Instance;
             if (stateManager != null)
@@ -164,7 +163,6 @@ namespace BecomeSisyphus.Inputs.Commands
                 // Only allow interaction in sailing states
                 if (statePath != null && statePath.Contains("Sailing"))
                 {
-                    Debug.Log("[InteractWithNearbyPointCommand] ✅ State is valid for interaction, calling controller.TryInteractWithNearbyPoint()");
                     controller.TryInteractWithNearbyPoint();
                 }
                 else

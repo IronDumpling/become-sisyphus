@@ -280,7 +280,6 @@ namespace BecomeSisyphus.Inputs.Controllers
                         if (harborWindow != null)
                         {
                             harborWindow.SetInteractionPoint(interactionPoint);
-                            Debug.Log($"[ThoughtBoatSailingController] ✅ Configured harbor window for island interaction");
                         }
                         else
                         {
@@ -537,32 +536,19 @@ namespace BecomeSisyphus.Inputs.Controllers
         /// Called by input system when interaction key is pressed
         /// </summary>
         public void TryInteractWithNearbyPoint()
-        {
-            Debug.Log("[ThoughtBoatSailingController] 🎯 TryInteractWithNearbyPoint called");
-            
+        {  
             if (mindOceanSystem != null)
             {
                 var nearbyPoint = mindOceanSystem.GetNearbyInteractionPoint();
                 if (nearbyPoint != null)
                 {
-                    Debug.Log($"[ThoughtBoatSailingController] ✅ Found nearby point {nearbyPoint.id} ({nearbyPoint.type}) - Attempting interaction");
                     InteractWithPoint(nearbyPoint);
                 }
-                else
-                {
-                    Debug.Log("[ThoughtBoatSailingController] ❌ No nearby interaction point found (using trigger system)");
-                }
-            }
-            else
-            {
-                Debug.LogError("[ThoughtBoatSailingController] ❌ mindOceanSystem is null!");
             }
         }
 
         private void InteractWithPoint(InteractionPoint point)
-        {
-            Debug.Log($"[ThoughtBoatSailingController] 🎯 Interacting with {point.title} ({point.type})");
-            
+        {            
             // Convert to legacy InteractionType and call OpenInteraction
             var legacyType = ConvertToLegacyInteractionType(point.type);
             Debug.Log($"[ThoughtBoatSailingController] Converting {point.type} to legacy type: {legacyType}");
@@ -599,9 +585,7 @@ namespace BecomeSisyphus.Inputs.Controllers
             // Check if we hit an interaction point
             var interactionPointBehaviour = other.GetComponent<InteractionPointBehaviour>();
             if (interactionPointBehaviour != null)
-            {
-                Debug.Log($"[ThoughtBoatSailingController] ✅ Found InteractionPointBehaviour on {other.name}");
-                
+            {                
                 if (mindOceanSystem != null)
                 {
                     string interactionId = interactionPointBehaviour.GetInteractionId();
@@ -611,7 +595,6 @@ namespace BecomeSisyphus.Inputs.Controllers
                     var interactionPoint = mindOceanSystem.GetInteractionPoint(interactionId);
                     if (interactionPoint != null)
                     {
-                        Debug.Log($"[ThoughtBoatSailingController] 🎯 Entered trigger for {interactionPoint.title} ({interactionPoint.type})");
                         mindOceanSystem.OnInteractionPointTriggered(interactionPoint);
                     }
                     else
@@ -624,10 +607,6 @@ namespace BecomeSisyphus.Inputs.Controllers
                 {
                     Debug.LogError($"[ThoughtBoatSailingController] ❌ mindOceanSystem is null!");
                 }
-            }
-            else
-            {
-                Debug.Log($"[ThoughtBoatSailingController] ❌ No InteractionPointBehaviour found on {other.name}");
             }
         }
         

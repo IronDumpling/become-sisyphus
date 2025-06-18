@@ -55,12 +55,6 @@ namespace BecomeSisyphus.Managers.Systems
                 Vector3 oldPosition = currentPosition;
                 currentPosition = position;
                 OnPositionChanged?.Invoke(currentPosition);
-                
-                // Debug position updates occasionally (simplified for trigger system)
-                if (Vector3.Distance(oldPosition, currentPosition) > 1f || Time.frameCount % 120 == 0)
-                {
-                    Debug.Log($"[MindOceanSystem] 📍 Position updated to {currentPosition}");
-                }
             }
         }
 
