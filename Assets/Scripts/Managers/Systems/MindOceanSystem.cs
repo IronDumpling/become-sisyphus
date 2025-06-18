@@ -11,19 +11,25 @@ namespace BecomeSisyphus.Managers.Systems
     {
         private Dictionary<string, MindSeaRegion> regions = new Dictionary<string, MindSeaRegion>();
         private Dictionary<string, MapMarker> markers = new Dictionary<string, MapMarker>();
+        private Dictionary<string, InteractionPoint> interactionPoints = new Dictionary<string, InteractionPoint>();
         private Vector3 currentPosition;
         private MindSeaRegion currentRegion;
+        private InteractionPoint nearbyInteractionPoint;
         private SisyphusMindSystem mindSystem;
 
         public event Action<Vector3> OnPositionChanged;
         public event Action<MindSeaRegion> OnRegionEntered;
         public event Action<MapMarker> OnMarkerDiscovered;
         public event Action<Hazard> OnHazardEncountered;
+        public event Action<InteractionPoint> OnInteractionPointEntered;
+        public event Action<InteractionPoint> OnInteractionPointExited;
+        public event Action<InteractionPoint> OnInteractionPointDiscovered;
 
         public void Initialize()
         {
             mindSystem = GameManager.Instance.GetSystem<SisyphusMindSystem>();
             LoadInitialRegions();
+            // LoadInitialInteractionPoints(); // Commented out - interaction points will be registered by scene objects
         }
 
         public void Update()
@@ -31,6 +37,7 @@ namespace BecomeSisyphus.Managers.Systems
             UpdateCurrentRegion();
             CheckHazards();
             UpdateMarkers();
+            UpdateInteractionPoints();
         }
 
         public void Navigate(Vector3 direction)
@@ -40,6 +47,22 @@ namespace BecomeSisyphus.Managers.Systems
             {
                 currentPosition = newPosition;
                 OnPositionChanged?.Invoke(currentPosition);
+            }
+        }
+
+        public void SetPosition(Vector3 position)
+        {
+            if (IsValidPosition(position))
+            {
+                Vector3 oldPosition = currentPosition;
+                currentPosition = position;
+                OnPositionChanged?.Invoke(currentPosition);
+                
+                // Debug position updates occasionally
+                if (Vector3.Distance(oldPosition, currentPosition) > 1f || Time.frameCount % 120 == 0)
+                {
+                    Debug.Log($"[MindOceanSystem] 📍 Position updated to {currentPosition}, nearby points: {interactionPoints.Count}");
+                }
             }
         }
 
@@ -176,14 +199,185 @@ namespace BecomeSisyphus.Managers.Systems
             // TODO: 实现区域秘密揭示逻辑
         }
 
+        // Interaction Point Management
+        public void AddInteractionPoint(InteractionPoint point)
+        {
+            if (!interactionPoints.ContainsKey(point.id))
+            {
+                interactionPoints.Add(point.id, point);
+                Debug.Log($"[MindOceanSystem] ✅ Added interaction point {point.id} of type {point.type} at {point.position}. Total points: {interactionPoints.Count}");
+            }
+            else
+            {
+                Debug.LogWarning($"[MindOceanSystem] ⚠️ Interaction point {point.id} already exists!");
+            }
+        }
+
+        public void RemoveInteractionPoint(string pointId)
+        {
+            if (interactionPoints.ContainsKey(pointId))
+            {
+                interactionPoints.Remove(pointId);
+                Debug.Log($"MindOceanSystem: Removed interaction point {pointId}");
+            }
+        }
+
+        public InteractionPoint GetInteractionPoint(string pointId)
+        {
+            interactionPoints.TryGetValue(pointId, out InteractionPoint point);
+            return point;
+        }
+
+        public InteractionPoint GetNearbyInteractionPoint()
+        {
+            return nearbyInteractionPoint;
+        }
+
+        public List<InteractionPoint> GetAllInteractionPoints()
+        {
+            return new List<InteractionPoint>(interactionPoints.Values);
+        }
+
+        public List<InteractionPoint> GetDiscoveredInteractionPoints()
+        {
+            var discovered = new List<InteractionPoint>();
+            foreach (var point in interactionPoints.Values)
+            {
+                if (point.isDiscovered)
+                {
+                    discovered.Add(point);
+                }
+            }
+            return discovered;
+        }
+
+        private void UpdateInteractionPoints()
+        {
+            InteractionPoint closestPoint = null;
+            float closestDistance = float.MaxValue;
+
+            // Find the closest interaction point within range
+            foreach (var point in interactionPoints.Values)
+            {
+                if (!point.isActive) continue;
+
+                float distance = Vector3.Distance(currentPosition, point.position);
+                
+                // Discover point if within range and not yet discovered
+                if (!point.isDiscovered && distance <= point.interactionRadius * 2f)
+                {
+                    point.isDiscovered = true;
+                    OnInteractionPointDiscovered?.Invoke(point);
+                    Debug.Log($"MindOceanSystem: Discovered interaction point {point.id} ({point.type})");
+                }
+
+                // Check for closest point within interaction range
+                if (distance <= point.interactionRadius && distance < closestDistance)
+                {
+                    closestPoint = point;
+                    closestDistance = distance;
+                }
+            }
+
+            // Handle nearby interaction point changes
+            if (closestPoint != nearbyInteractionPoint)
+            {
+                // Exit previous interaction point
+                if (nearbyInteractionPoint != null)
+                {
+                    OnInteractionPointExited?.Invoke(nearbyInteractionPoint);
+                    Debug.Log($"[MindOceanSystem] ⬅️ Exited interaction range of {nearbyInteractionPoint.id} ({nearbyInteractionPoint.type})");
+                }
+
+                // Enter new interaction point
+                nearbyInteractionPoint = closestPoint;
+                if (nearbyInteractionPoint != null)
+                {
+                    OnInteractionPointEntered?.Invoke(nearbyInteractionPoint);
+                    Debug.Log($"[MindOceanSystem] ➡️ Entered interaction range of {nearbyInteractionPoint.id} ({nearbyInteractionPoint.type}) - Distance: {closestDistance:F2}");
+                }
+            }
+        }
+
+        private void LoadInitialInteractionPoints()
+        {
+            // Create some initial interaction points for testing
+            // In a real implementation, this would load from configuration or save data
+            
+            // Harbor (current position based on the screenshot)
+            var harborPoint = new InteractionPoint("harbor_01", InteractionPointType.Harbor, new Vector3(0, 0, 0))
+            {
+                title = "港口",
+                description = "在这里你可以安全地休息，恢复精神力量。",
+                data = new HarborData
+                {
+                    restEffectiveness = 1.2f,
+                    restDuration = 5f,
+                    canRepairVessel = true,
+                    availableServices = new List<string> { "休息", "船只维修", "补给" }
+                }
+            };
+
+            // Lighthouse
+            var lighthousePoint = new InteractionPoint("lighthouse_01", InteractionPointType.Lighthouse, new Vector3(10, 5, 0))
+            {
+                title = "灯塔",
+                description = "古老的灯塔为迷失在思想海洋中的船只指引方向。",
+                data = new LighthouseData
+                {
+                    illuminationRadius = 15f,
+                    providesNavigation = true,
+                    lightkeeperMessage = "欢迎来到思想的灯塔，这里能为你的心灵航程提供指引。"
+                }
+            };
+
+            // Island
+            var islandPoint = new InteractionPoint("island_01", InteractionPointType.Island, new Vector3(-8, 3, 0))
+            {
+                title = "记忆之岛",
+                description = "一座充满回忆的小岛，或许能找到一些有用的东西。",
+                data = new IslandData
+                {
+                    availableResources = new List<string> { "记忆碎片", "精神之果", "智慧结晶" },
+                    hasSecrets = true,
+                    explorationReward = "解锁新的记忆"
+                }
+            };
+
+            // Salvage point
+            var salvagePoint = new InteractionPoint("salvage_01", InteractionPointType.Salvage, new Vector3(5, -8, 0))
+            {
+                title = "沉船遗迹",
+                description = "一处沉船的遗迹，或许能打捞到有价值的物品。",
+                data = new SalvageData
+                {
+                    availableItems = new List<string> { "古老的航海图", "神秘的指南针", "失落的日记" },
+                    salvageDifficulty = 0.8f,
+                    isExhausted = false
+                }
+            };
+
+            AddInteractionPoint(harborPoint);
+            AddInteractionPoint(lighthousePoint);
+            AddInteractionPoint(islandPoint);
+            AddInteractionPoint(salvagePoint);
+
+            Debug.Log($"MindOceanSystem: Loaded {interactionPoints.Count} initial interaction points");
+        }
+
         public void Cleanup()
         {
             regions.Clear();
             markers.Clear();
+            interactionPoints.Clear();
+            nearbyInteractionPoint = null;
             OnPositionChanged = null;
             OnRegionEntered = null;
             OnMarkerDiscovered = null;
             OnHazardEncountered = null;
+            OnInteractionPointEntered = null;
+            OnInteractionPointExited = null;
+            OnInteractionPointDiscovered = null;
         }
     }
 }

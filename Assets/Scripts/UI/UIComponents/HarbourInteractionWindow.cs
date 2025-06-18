@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using BecomeSisyphus.Core.GameStateSystem;
+using BecomeSisyphus.Core.Data;
 
 namespace BecomeSisyphus.UI.Components
 {
@@ -20,6 +21,8 @@ namespace BecomeSisyphus.UI.Components
 
         private bool isResting = false;
         private float restTimer = 0f;
+        private InteractionPoint currentInteractionPoint;
+        private HarborData harborData;
 
         protected override void Awake()
         {
@@ -30,10 +33,32 @@ namespace BecomeSisyphus.UI.Components
                 restButton.onClick.AddListener(StartResting);
         }
 
+        /// <summary>
+        /// Set the interaction point data for this window
+        /// </summary>
+        public void SetInteractionPoint(InteractionPoint interactionPoint)
+        {
+            currentInteractionPoint = interactionPoint;
+            if (interactionPoint?.data is HarborData harbor)
+            {
+                harborData = harbor;
+                restDuration = harbor.restDuration;
+                restEffectiveness = harbor.restEffectiveness;
+            }
+        }
+
         protected override void InitializeWindow()
         {
-            SetTitle("港口");
-            SetDescription("在这里你可以安全地休息，恢复精神力量。");
+            if (currentInteractionPoint != null)
+            {
+                SetTitle(currentInteractionPoint.title);
+                SetDescription(currentInteractionPoint.description);
+            }
+            else
+            {
+                SetTitle("港口");
+                SetDescription("在这里你可以安全地休息，恢复精神力量。");
+            }
         }
 
         private void Update()

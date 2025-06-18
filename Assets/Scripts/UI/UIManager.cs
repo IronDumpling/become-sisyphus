@@ -304,6 +304,65 @@ namespace BecomeSisyphus.UI
         }
 
         /// <summary>
+        /// 显示交互提示（用于靠近交互点时显示）
+        /// </summary>
+        public void ShowInteractionHint(string hintText)
+        {
+            if (hintTextPrefab != null)
+            {
+                // Remove existing interaction hint first
+                HideInteractionHint();
+                
+                GameObject hintObject = Instantiate(hintTextPrefab, hintContainer);
+                
+                // Set text content
+                var hintComponent = hintObject.GetComponent<HintTextComponent>();
+                if (hintComponent != null)
+                {
+                    hintComponent.SetText(hintText);
+                }
+                else
+                {
+                    var textComponent = hintObject.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+                    if (textComponent != null)
+                    {
+                        textComponent.text = hintText;
+                    }
+                }
+
+                activeUIComponents["InteractionHint"] = hintObject;
+                Debug.Log($"UIManager: Interaction hint shown: {hintText}");
+            }
+        }
+
+        /// <summary>
+        /// 隐藏交互提示
+        /// </summary>
+        public void HideInteractionHint()
+        {
+            if (activeUIComponents.TryGetValue("InteractionHint", out GameObject hintObject))
+            {
+                var hintComponent = hintObject.GetComponent<HintTextComponent>();
+                if (hintComponent != null)
+                {
+                    hintComponent.FadeOut(() =>
+                    {
+                        activeUIComponents.Remove("InteractionHint");
+                        if (hintObject != null)
+                            Destroy(hintObject);
+                    });
+                }
+                else
+                {
+                    activeUIComponents.Remove("InteractionHint");
+                    if (hintObject != null)
+                        Destroy(hintObject);
+                }
+                Debug.Log("UIManager: Interaction hint hidden");
+            }
+        }
+
+        /// <summary>
         /// 显示窗口
         /// </summary>
         private void ShowWindow(WindowType windowType)

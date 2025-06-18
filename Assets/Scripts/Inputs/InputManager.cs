@@ -198,11 +198,10 @@ namespace BecomeSisyphus.Inputs
             RegisterCommand("MoveBoat", sailingMoveBoatCommand);
             RegisterCommand("EnterOutsideWorld", new EnterOutsideWorldFromInsideCommand());
 
-            // Use unified OpenInteractionCommand with specific interaction types
-            RegisterCommand("OpenIslandInteraction", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Island, ""));
-            RegisterCommand("OpenSalvageInteraction", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Salvage, ""));
-            RegisterCommand("OpenLighthouseInteraction", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Lighthouse, ""));
-            RegisterCommand("OpenHarborInteraction", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Harbor, ""));
+            // Unified interaction command for nearby points
+            RegisterCommand("InteractWithNearbyPoint", new InteractWithNearbyPointCommand(thoughtBoatSailingController));
+            
+            // Keep vessel and navigation commands as they're not location-based
             RegisterCommand("OpenVesselUI", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Vessel));
             RegisterCommand("OpenNavigationMap", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.NavigationMap));
             RegisterCommand("OpenTelescope", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Telescope));
@@ -313,7 +312,7 @@ namespace BecomeSisyphus.Inputs
         
         private void OnActionPerformed(InputAction.CallbackContext context)
         {
-            Debug.Log($"InputManager: Action performed: {context.action.name}");
+            Debug.Log($"InputManager: Action performed: {context.action.name} in ActionMap: {currentActionMap?.name}");
             
             // Handle Vector2 actions differently
             if (context.action.name == "MoveBoat")
@@ -338,6 +337,7 @@ namespace BecomeSisyphus.Inputs
             }
             else
             {
+                Debug.Log($"InputManager: Executing command for action: {context.action.name}");
                 ExecuteCommand(context.action.name);
             }
         }

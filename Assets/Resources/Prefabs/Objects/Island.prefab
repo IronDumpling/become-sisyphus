@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6119509017265252095}
+  - component: {fileID: 6170245553715973313}
   m_Layer: 0
   m_Name: Island
   m_TagString: Untagged
@@ -32,6 +33,35 @@ Transform:
   - {fileID: 1360416384459154691}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6170245553715973313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 600986644419406805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08c483baab4142a4c9755c1f412a5a28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactionId: 
+  pointType: 0
+  displayTitle: Island 1
+  displayDescription: "\u4E00\u4E2A\u53EF\u4EE5\u4EA4\u4E92\u7684\u5C0F\u5CF6"
+  interactionRadius: 8
+  restEffectiveness: 1.2
+  restDuration: 5
+  canRepairVessel: 1
+  illuminationRadius: 15
+  providesNavigation: 1
+  lightkeeperMessage: "\u706F\u5854\u5B88\u62A4\u8005\u7684\u4FE1\u606F"
+  hasSecrets: 0
+  explorationReward: "\u63A2\u7D22\u5956\u52B1"
+  salvageDifficulty: 1
+  isExhausted: 0
+  showGizmos: 1
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!1 &7246872422578118294
 GameObject:
   m_ObjectHideFlags: 0
@@ -109,7 +139,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 3023947217505616116, guid: 6f12142db198e044e9b312dd597d6bb8, type: 3}
-  m_Color: {r: 0.8260005, g: 0.990566, b: 0.38781592, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

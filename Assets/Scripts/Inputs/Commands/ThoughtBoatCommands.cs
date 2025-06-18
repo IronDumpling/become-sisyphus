@@ -5,6 +5,10 @@ using BecomeSisyphus.Core.GameStateSystem;
 
 namespace BecomeSisyphus.Inputs.Commands
 {
+    /// <summary>
+    /// Command for non-location-based interactions (Vessel UI, Navigation Map, Telescope)
+    /// Location-based interactions now use InteractWithNearbyPointCommand
+    /// </summary>
     public class OpenInteractionCommand : ICommand
     {
         private readonly ThoughtBoatSailingController controller;
@@ -130,6 +134,48 @@ namespace BecomeSisyphus.Inputs.Commands
         public void UpdateDirection(Vector2 newDirection)
         {
             direction = newDirection;
+        }
+    }
+
+    /// <summary>
+    /// Command to interact with nearby interaction point
+    /// </summary>
+    public class InteractWithNearbyPointCommand : ICommand
+    {
+        private readonly ThoughtBoatSailingController controller;
+
+        public InteractWithNearbyPointCommand(ThoughtBoatSailingController controller)
+        {
+            this.controller = controller;
+        }
+
+        public void Execute()
+        {
+            Debug.Log("[InteractWithNearbyPointCommand] 🚀 Execute() called");
+            
+            var stateManager = BecomeSisyphus.Core.GameStateSystem.GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                var currentState = stateManager.CurrentActiveState;
+                var statePath = currentState?.GetFullStatePath();
+                
+                Debug.Log($"[InteractWithNearbyPointCommand] Current State: {currentState?.StateName}, Path: {statePath}");
+                
+                // Only allow interaction in sailing states
+                if (statePath != null && statePath.Contains("Sailing"))
+                {
+                    Debug.Log("[InteractWithNearbyPointCommand] ✅ State is valid for interaction, calling controller.TryInteractWithNearbyPoint()");
+                    controller.TryInteractWithNearbyPoint();
+                }
+                else
+                {
+                    Debug.LogWarning($"[InteractWithNearbyPointCommand] ❌ Cannot interact in current state: {currentState?.StateName}");
+                }
+            }
+            else
+            {
+                Debug.LogError("[InteractWithNearbyPointCommand] ❌ GameStateManager.Instance is null!");
+            }
         }
     }
 } 

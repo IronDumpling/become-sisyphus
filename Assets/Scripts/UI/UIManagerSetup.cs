@@ -56,7 +56,6 @@ namespace BecomeSisyphus.UI
             SetPrefabField("progressBarPrefab", progressBarPrefabPath);
             SetPrefabField("timePrefab", timePrefabPath);
             SetPrefabField("hintTextPrefab", hintTextPrefabPath);
-            SetPrefabField("keyHintsPrefab", keyHintsPrefabPath);
             SetPrefabField("harbourWindowPrefab", harbourWindowPrefabPath);
             SetPrefabField("lighthouseWindowPrefab", lighthouseWindowPrefabPath);
             SetPrefabField("salvageWindowPrefab", salvageWindowPrefabPath);
