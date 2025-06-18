@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Core.Data;
 using BecomeSisyphus.Core.Interfaces;
+using BecomeSisyphus.Core.GameStateSystem;
 
 namespace BecomeSisyphus.Managers.Systems
 {
@@ -11,7 +12,7 @@ namespace BecomeSisyphus.Managers.Systems
     {
         private SisyphusManager sisyphusManager;
         private Vector3 currentPosition;
-        private float explorationSpeed = 5f;
+        // private float explorationSpeed = 5f;
         private float mentalStrengthConsumptionRate = 2f;
 
         public event Action<Vector3> OnPositionChanged;
@@ -26,7 +27,8 @@ namespace BecomeSisyphus.Managers.Systems
 
         public void Update()
         {
-            if (GameManager.Instance.CurrentState == GameState.ExploringMind)
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null && stateManager.IsInState("ExploringMind"))
             {
                 HandleExplorationInput();
                 ConsumeMentalStrength();

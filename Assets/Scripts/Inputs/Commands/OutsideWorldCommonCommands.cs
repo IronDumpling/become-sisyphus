@@ -1,35 +1,58 @@
 using UnityEngine;
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Core.Interfaces;
-using BecomeSisyphus.Inputs.Controllers;
+using BecomeSisyphus.Core.GameStateSystem;
 using BecomeSisyphus.Managers.Systems;
 
 namespace BecomeSisyphus.Inputs.Commands
 {
-    public class SelectSignifierCommand : ICommand
+    /// <summary>
+    /// 开始爬山命令 (MountainFoot -> Climbing)
+    /// </summary>
+    public class StartClimbingCommand : ICommand
     {
-        private readonly OutsideWorldController controller;
-        private readonly Vector2 position;
-
-        public SelectSignifierCommand(OutsideWorldController controller, Vector2 position)
-        {
-            this.controller = controller;
-            this.position = position;
-        }
-
         public void Execute()
         {
-            // TODO: 实现选择标识物逻辑
+            Debug.Log("StartClimbingCommand: Executing start climbing");
+            
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                var currentState = stateManager.CurrentActiveState;
+                if (currentState is MountainFootState mountainFootState)
+                {
+                    mountainFootState.StartClimbing();
+                }
+                else
+                {
+                    Debug.LogWarning($"StartClimbingCommand: Cannot execute from current state: {currentState?.StateName}");
+                }
+            }
         }
     }
 
-    public class SwitchToInsideWorldCommand : ICommand
+    /// <summary>
+    /// 进入内部世界命令 (Climbing -> InsideWorld)
+    /// </summary>
+    public class EnterInsideWorldCommand : ICommand
     {
         public void Execute()
         {
-            GameManager.Instance.ChangeState(GameState.Sailing);
-            GameManager.Instance.GetSystem<CameraSystem>().SwitchToInsideWorld();
-            Debug.Log("Switching to Inside World (Sailing State)");
+            Debug.Log("EnterInsideWorldCommand: Executing enter inside world");
+            
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                var currentState = stateManager.CurrentActiveState;
+                if (currentState is ClimbingState climbingState)
+                {
+                    climbingState.EnterInsideWorld();
+                }
+                else
+                {
+                    Debug.LogWarning($"EnterInsideWorldCommand: Cannot execute from current state: {currentState?.StateName}");
+                }
+            }
         }
     }
 } 

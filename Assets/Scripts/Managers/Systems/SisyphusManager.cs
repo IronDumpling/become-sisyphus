@@ -24,7 +24,12 @@ namespace BecomeSisyphus.Managers.Systems
             MentalStrengthRegenRate = mentalStrengthRegenRate;
         }
 
-        public void Initialize() { /* Initial values are now set by the constructor */ }
+        public void Initialize() 
+        { 
+            /* Initial values are now set by the constructor */
+            // Trigger initial event to notify UI components
+            OnMentalStrengthChanged?.Invoke(MentalStrength);
+        }
 
         public void Update() { /* Parameterless Update for ISystem */ }
 

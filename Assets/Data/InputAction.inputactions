@@ -4,37 +4,24 @@
         {
             "name": "MainTitle",
             "id": "ddf8cc65-f1e2-4a31-ae2c-15762f47a9f2",
-            "actions": [
-                {
-                    "name": "New action",
-                    "type": "Button",
-                    "id": "91ba3397-9bb2-4cd3-93f7-a5146e952b57",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                }
-            ],
-            "bindings": [
-                {
-                    "name": "",
-                    "id": "96c02125-5303-4786-95ad-37ce96a827a7",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "New action",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                }
-            ]
+            "actions": [],
+            "bindings": []
         },
         {
             "name": "OutsideWorld",
             "id": "15705f2c-11f5-4c8d-b352-5b2d1d2784d6",
             "actions": [
                 {
-                    "name": "SwitchToInsideWorld",
+                    "name": "StartClimbing",
+                    "type": "Button",
+                    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "EnterInsideWorld",
                     "type": "Button",
                     "id": "b58cadc7-9edd-4010-9181-a02a4af2f604",
                     "expectedControlType": "",
@@ -46,12 +33,23 @@
             "bindings": [
                 {
                     "name": "",
+                    "id": "1a2b3c4d-5e6f-7890-abcd-ef1234567890",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "StartClimbing",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "0e8c9b2d-6924-4aa7-924f-859253270527",
                     "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "SwitchToInsideWorld",
+                    "action": "EnterInsideWorld",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -62,7 +60,16 @@
             "id": "cadc1420-5f68-480e-8558-b141ee6a3798",
             "actions": [
                 {
-                    "name": "SwitchToOutsideWorld",
+                    "name": "StartSailing",
+                    "type": "Button",
+                    "id": "2b3c4d5e-6f78-9012-bcde-f23456789012",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "EnterOutsideWorld",
                     "type": "Button",
                     "id": "5e707bc7-fc5e-4d60-a54e-35a1824e6ea9",
                     "expectedControlType": "",
@@ -83,12 +90,23 @@
             "bindings": [
                 {
                     "name": "",
+                    "id": "3c4d5e6f-7890-1234-cdef-456789012345",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "StartSailing",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "d870ba0b-aa07-45d8-9bc2-9b33fc3f2b93",
                     "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "SwitchToOutsideWorld",
+                    "action": "EnterOutsideWorld",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -151,12 +169,39 @@
         },
         {
             "name": "BoatSailing",
-            "id": "3ce2e5bd-0aab-4e73-9eaa-afc404d6c1de",
+            "id": "8e1c9dab-0bd6-431c-9e80-516596df8505",
             "actions": [
                 {
-                    "name": "New action",
+                    "name": "InteractWithNearbyPoint",
                     "type": "Button",
-                    "id": "682c37bf-6735-485c-88c3-1dbc3a2a43dc",
+                    "id": "56638c12-c7c4-4fae-be40-762cf1db40f4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "EnterOutsideWorld",
+                    "type": "Button",
+                    "id": "54207cf2-8102-4248-b488-28c668a8c4ed",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "MoveBoat",
+                    "type": "Value",
+                    "id": "d38e9b8d-8e01-4db5-9cc0-2231b808b9a7",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "StartSailing",
+                    "type": "Button",
+                    "id": "80d96477-b36b-4ac8-bc8c-89344d29a04c",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -166,12 +211,89 @@
             "bindings": [
                 {
                     "name": "",
-                    "id": "84394469-ab68-4704-969e-fdafe8ca4be6",
-                    "path": "",
+                    "id": "d3aaa9bb-e0a6-4214-9b95-aeaa5c474cc4",
+                    "path": "<Keyboard>/enter",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "New action",
+                    "action": "InteractWithNearbyPoint",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e6702a0e-a913-419e-80b7-9373b704b8d4",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "EnterOutsideWorld",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "2D Vector",
+                    "id": "4532442f-0a40-4a2d-96de-faa9f51653c0",
+                    "path": "2DVector",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveBoat",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "bf82f406-06cd-498e-9b46-7daeefd509b6",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveBoat",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "down",
+                    "id": "2acd99f9-c7ff-4ccc-be19-c2b4f0d27485",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveBoat",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "d351069b-661d-49b0-a7f0-9d6ec26c6c48",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveBoat",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "4bdd27b8-d458-4632-a182-345eab206f23",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveBoat",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "7215dc84-9e46-4237-9583-43c2a300c970",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "StartSailing",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -182,9 +304,18 @@
             "id": "d6757167-155e-46ca-96ed-0e846741dc0b",
             "actions": [
                 {
-                    "name": "New action",
+                    "name": "StartSailing",
                     "type": "Button",
                     "id": "07aa657c-c9f8-4fac-91b6-ae05969b401b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "EnterOutsideWorld",
+                    "type": "Button",
+                    "id": "01234567-89ab-cdef-0123-456789abcdef",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -195,11 +326,22 @@
                 {
                     "name": "",
                     "id": "a109c8ab-b504-4602-8f1c-d0193375a1d1",
-                    "path": "",
+                    "path": "<Keyboard>/escape",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "New action",
+                    "action": "StartSailing",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "12345678-9abc-def0-1234-56789abcdef0",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "EnterOutsideWorld",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

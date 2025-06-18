@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using System.Linq;
 using BecomeSisyphus.Core.Interfaces;
 using BecomeSisyphus.Core;
 using BecomeSisyphus.Inputs.Commands;
@@ -14,20 +15,15 @@ namespace BecomeSisyphus.Inputs
 
         [SerializeField] private InputActionAsset inputActions;
 
-        [Header("Controller Settings")]
-        [SerializeField] private bool createOutsideWorldController = true;
-        [SerializeField] private bool createThoughtBoatSailingController = true;
-        [SerializeField] private bool createThoughtBoatInteractionController = true;
-        [SerializeField] private bool createThoughtVesselController = true;
-        [SerializeField] private bool createTelescopeController = true;
-
         private InputActionMap currentActionMap;
         private Dictionary<string, ICommand> commandMap = new Dictionary<string, ICommand>();
 
+        // Store move command for dynamic updates
+        private MoveBoatCommand moveBoatCommand;
+        private MoveBoatCommand sailingMoveBoatCommand;
+
         // Controllers
-        private OutsideWorldController outsideWorldController;
         private ThoughtBoatSailingController thoughtBoatSailingController;
-        private ThoughtBoatInteractionController thoughtBoatInteractionController;
         private ThoughtVesselController thoughtVesselController;
         private TelescopeController telescopeController;
 
@@ -37,7 +33,6 @@ namespace BecomeSisyphus.Inputs
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
-                CreateControllers();
                 InitializeInputActions();
             }
             else
@@ -46,51 +41,18 @@ namespace BecomeSisyphus.Inputs
             }
         }
 
-        private void CreateControllers()
+        // New method: Find and set active controllers when needed
+        public void SetActiveControllers()
         {
-            if (createOutsideWorldController)
-            {
-                var controllerObj = new GameObject("OutsideWorldController");
-                controllerObj.transform.SetParent(transform);
-                outsideWorldController = controllerObj.AddComponent<OutsideWorldController>();
-            }
+            // Find controllers in current scene
+            thoughtBoatSailingController = FindAnyObjectByType<ThoughtBoatSailingController>();
+            thoughtVesselController = FindAnyObjectByType<ThoughtVesselController>();
+            telescopeController = FindAnyObjectByType<TelescopeController>();
 
-            if (createThoughtBoatSailingController)
-            {
-                var controllerObj = new GameObject("ThoughtBoatSailingController");
-                controllerObj.transform.SetParent(transform);
-                thoughtBoatSailingController = controllerObj.AddComponent<ThoughtBoatSailingController>();
-            }
-
-            if (createThoughtBoatInteractionController)
-            {
-                var controllerObj = new GameObject("ThoughtBoatInteractionController");
-                controllerObj.transform.SetParent(transform);
-                thoughtBoatInteractionController = controllerObj.AddComponent<ThoughtBoatInteractionController>();
-            }
-
-            if (createThoughtVesselController)
-            {
-                var controllerObj = new GameObject("ThoughtVesselController");
-                controllerObj.transform.SetParent(transform);
-                thoughtVesselController = controllerObj.AddComponent<ThoughtVesselController>();
-            }
-
-            if (createTelescopeController)
-            {
-                var controllerObj = new GameObject("TelescopeController");
-                controllerObj.transform.SetParent(transform);
-                telescopeController = controllerObj.AddComponent<TelescopeController>();
-            }
-        }
-
-        private void ValidateControllers()
-        {
-            if (outsideWorldController == null && createOutsideWorldController) Debug.LogWarning("OutsideWorldController not created!");
-            if (thoughtBoatSailingController == null && createThoughtBoatSailingController) Debug.LogWarning("ThoughtBoatSailingController not created!");
-            if (thoughtBoatInteractionController == null && createThoughtBoatInteractionController) Debug.LogWarning("ThoughtBoatInteractionController not created!");
-            if (thoughtVesselController == null && createThoughtVesselController) Debug.LogWarning("ThoughtVesselController not created!");
-            if (telescopeController == null && createTelescopeController) Debug.LogWarning("TelescopeController not created!");
+            Debug.Log($"InputManager: SetActiveControllers - Found controllers: " +
+                     $"ThoughtBoatSailing={thoughtBoatSailingController != null}, " +
+                     $"ThoughtVessel={thoughtVesselController != null}, " +
+                     $"Telescope={telescopeController != null}");
         }
 
         private void InitializeInputActions()
@@ -101,8 +63,19 @@ namespace BecomeSisyphus.Inputs
                 return;
             }
 
+            Debug.Log($"InputManager: Initializing Input Actions. Found {inputActions.actionMaps.Count} action maps");
+
             foreach (var actionMap in inputActions.actionMaps)
             {
+                Debug.Log($"InputManager: Found action map: {actionMap.name} with {actionMap.actions.Count} actions");
+                foreach (var action in actionMap.actions)
+                {
+                    Debug.Log($"    Action: {action.name}");
+                    foreach (var binding in action.bindings)
+                    {
+                        Debug.Log($"      Binding: {binding.path}");
+                    }
+                }
                 actionMap.Enable();
                 actionMap.Disable();
             }
@@ -113,8 +86,15 @@ namespace BecomeSisyphus.Inputs
 
         public void SwitchActionMap(string actionMapName)
         {
+            Debug.Log($"InputManager: Attempting to switch to action map: {actionMapName}");
+            
+            // Update controller references when switching action maps
+            SetActiveControllers();
+            
             if (currentActionMap != null)
             {
+                Debug.Log($"InputManager: Disabling current action map: {currentActionMap.name}");
+                UnsubscribeFromActions();
                 currentActionMap.Disable();
                 UnregisterAllCommands();
             }
@@ -122,13 +102,24 @@ namespace BecomeSisyphus.Inputs
             currentActionMap = inputActions.FindActionMap(actionMapName);
             if (currentActionMap != null)
             {
+                Debug.Log($"InputManager: Found action map: {actionMapName}, enabling...");
                 currentActionMap.Enable();
+                
+                // Log all actions in this action map
+                Debug.Log($"InputManager: Action map {actionMapName} has {currentActionMap.actions.Count} actions:");
+                foreach (var action in currentActionMap.actions)
+                {
+                    Debug.Log($"  - Action: {action.name}, Enabled: {action.enabled}");
+                }
+                
                 RegisterCommandsForActionMap(actionMapName);
-                Debug.Log($"Switched to action map: {actionMapName}");
+                SubscribeToActions();
+                Debug.Log($"InputManager: Successfully switched to action map: {actionMapName}");
             }
             else
             {
-                Debug.LogError($"Action map not found: {actionMapName}");
+                Debug.LogError($"InputManager: Action map not found: {actionMapName}");
+                Debug.LogError($"InputManager: Available action maps: {string.Join(", ", inputActions.actionMaps.Select(am => am.name))}");
             }
         }
 
@@ -136,6 +127,9 @@ namespace BecomeSisyphus.Inputs
         {
             switch (actionMapName)
             {
+                case "MainTitle":
+                    // No commands needed for MainTitle as it auto-transitions
+                    break;
                 case "OutsideWorld":
                     RegisterOutsideWorldCommands();
                     break;
@@ -159,43 +153,74 @@ namespace BecomeSisyphus.Inputs
 
         private void RegisterOutsideWorldCommands()
         {
-            if (outsideWorldController == null) return;
+            Debug.Log("InputManager: Registering OutsideWorld commands...");
 
-            RegisterCommand("SelectSignifier", new SelectSignifierCommand(outsideWorldController, Vector2.zero));
-            RegisterCommand("SwitchToInsideWorld", new SwitchToInsideWorldCommand());
-            RegisterCommand("UsePerceptionSkill", new UsePerceptionSkillCommand(outsideWorldController));
+            // State-specific commands based on current state
+            RegisterCommand("StartClimbing", new StartClimbingCommand());
+            RegisterCommand("EnterInsideWorld", new EnterInsideWorldCommand());
+
+            Debug.Log("InputManager: Finished registering OutsideWorld commands");
         }
 
         private void RegisterInsideWorldCommands()
         {
-            if (thoughtBoatSailingController == null) return;
+            if (thoughtBoatSailingController == null) 
+            {
+                Debug.LogError("InputManager: thoughtBoatSailingController is null in RegisterInsideWorldCommands!");
+                return;
+            }
 
-            RegisterCommand("SwitchToOutsideWorld", new SwitchToOutsideWorldCommand());
-            RegisterCommand("UsePerceptionSkill", new UsePerceptionSkillCommand(outsideWorldController));
+            Debug.Log("InputManager: Registering InsideWorld commands...");
+
+            // State-specific commands
+            RegisterCommand("StartSailing", new CloseInteractionCommand());
+            RegisterCommand("EnterOutsideWorld", new EnterOutsideWorldFromInsideCommand());
+            
+            // Store move command for dynamic updates (using original MoveBoatCommand)
+            moveBoatCommand = new MoveBoatCommand(thoughtBoatSailingController, Vector2.zero);
+            RegisterCommand("MoveBoat", moveBoatCommand);
+
+            Debug.Log("InputManager: Finished registering InsideWorld commands");
         }
 
         private void RegisterBoatSailingCommands()
         {
-            if (thoughtBoatSailingController == null) return;
+            if (thoughtBoatSailingController == null) 
+            {
+                Debug.LogError("InputManager: thoughtBoatSailingController is null in RegisterBoatSailingCommands!");
+                return;
+            }
 
-            RegisterCommand("MoveBoat", new MoveBoatCommand(thoughtBoatSailingController, Vector2.zero));
-            RegisterCommand("StopBoat", new StopBoatCommand(thoughtBoatSailingController));
+            Debug.Log("InputManager: Registering BoatSailing commands...");
 
-            // Use unified OpenInteractionCommand with specific interaction types
-            RegisterCommand("OpenIslandInteraction", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Island, ""));
-            RegisterCommand("OpenSalvageInteraction", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Salvage, ""));
-            RegisterCommand("OpenLighthouseInteraction", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Lighthouse, ""));
-            RegisterCommand("OpenHarborInteraction", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Harbor, ""));
+            // Store move command for dynamic updates (separate instance for sailing)
+            sailingMoveBoatCommand = new MoveBoatCommand(thoughtBoatSailingController, Vector2.zero);
+            RegisterCommand("MoveBoat", sailingMoveBoatCommand);
+            RegisterCommand("EnterOutsideWorld", new EnterOutsideWorldFromInsideCommand());
+            
+            // Add StartSailing command for Esc key in sailing mode
+            RegisterCommand("StartSailing", new CloseInteractionCommand());
+
+            // Unified interaction command for nearby points
+            RegisterCommand("InteractWithNearbyPoint", new InteractWithNearbyPointCommand(thoughtBoatSailingController));
+            
+            // Keep vessel and navigation commands as they're not location-based
             RegisterCommand("OpenVesselUI", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Vessel));
             RegisterCommand("OpenNavigationMap", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.NavigationMap));
             RegisterCommand("OpenTelescope", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Telescope));
+
+            Debug.Log("InputManager: Finished registering BoatSailing commands");
         }
 
         private void RegisterBoatInteractionCommands()
         {
-            if (thoughtBoatInteractionController == null) return;
-
-            RegisterCommand("CloseInteraction", new CloseInteractionCommand(thoughtBoatInteractionController));
+            Debug.Log("InputManager: Registering BoatInteraction commands...");
+            
+            // Add StartSailing command for Esc key in interaction mode
+            RegisterCommand("StartSailing", new CloseInteractionCommand());
+            RegisterCommand("EnterOutsideWorld", new EnterOutsideWorldFromInsideCommand());
+            
+            Debug.Log("InputManager: Finished registering BoatInteraction commands");
         }
 
         private void RegisterThoughtVesselCommands()
@@ -250,20 +275,116 @@ namespace BecomeSisyphus.Inputs
 
         public void ExecuteCommand(string actionName)
         {
+            Debug.Log($"InputManager: Attempting to execute command: {actionName}");
+            
             if (commandMap.TryGetValue(actionName, out ICommand command))
             {
+                Debug.Log($"InputManager: Found command for {actionName}, executing...");
                 command.Execute();
+                Debug.Log($"InputManager: Command {actionName} executed successfully");
             }
             else
             {
-                Debug.LogWarning($"No command registered for action: {actionName}");
+                Debug.LogWarning($"InputManager: No command registered for action: {actionName}");
+                Debug.LogWarning($"InputManager: Available commands: {string.Join(", ", commandMap.Keys)}");
             }
+        }
+
+        private void SubscribeToActions()
+        {
+            if (currentActionMap == null) return;
+            
+            Debug.Log($"InputManager: Subscribing to actions in {currentActionMap.name}");
+            
+            foreach (var action in currentActionMap.actions)
+            {
+                Debug.Log($"InputManager: Subscribing to action: {action.name}");
+                action.performed += OnActionPerformed;
+                action.canceled += OnActionCanceled;
+                action.started += OnActionStarted;
+            }
+        }
+        
+        private void UnsubscribeFromActions()
+        {
+            if (currentActionMap == null) return;
+            
+            Debug.Log($"InputManager: Unsubscribing from actions in {currentActionMap.name}");
+            
+            foreach (var action in currentActionMap.actions)
+            {
+                action.performed -= OnActionPerformed;
+                action.canceled -= OnActionCanceled;
+                action.started -= OnActionStarted;
+            }
+        }
+        
+        private void OnActionPerformed(InputAction.CallbackContext context)
+        {
+            Debug.Log($"InputManager: Action performed: {context.action.name} in ActionMap: {currentActionMap?.name}");
+            
+            // Handle Vector2 actions differently
+            if (context.action.name == "MoveBoat")
+            {
+                Vector2 direction = context.ReadValue<Vector2>();
+                
+                // Update the appropriate command instance based on current action map
+                if (currentActionMap?.name == "InsideWorld" && moveBoatCommand != null)
+                {
+                    moveBoatCommand.UpdateDirection(direction);
+                    moveBoatCommand.Execute();
+                }
+                else if (currentActionMap?.name == "BoatSailing" && sailingMoveBoatCommand != null)
+                {
+                    sailingMoveBoatCommand.UpdateDirection(direction);
+                    sailingMoveBoatCommand.Execute();
+                }
+                else
+                {
+                    Debug.LogWarning($"InputManager: No MoveBoat command available for action map: {currentActionMap?.name}");
+                }
+            }
+            else
+            {
+                Debug.Log($"InputManager: Executing command for action: {context.action.name}");
+                ExecuteCommand(context.action.name);
+            }
+        }
+        
+        private void OnActionCanceled(InputAction.CallbackContext context)
+        {
+            Debug.Log($"InputManager: Action canceled: {context.action.name}");
+            
+            // Handle MoveBoat action cancellation (when player releases WASD)
+            if (context.action.name == "MoveBoat")
+            {
+                // Send zero direction to stop the boat
+                if (currentActionMap?.name == "InsideWorld" && moveBoatCommand != null)
+                {
+                    moveBoatCommand.UpdateDirection(Vector2.zero);
+                    moveBoatCommand.Execute();
+                }
+                else if (currentActionMap?.name == "BoatSailing" && sailingMoveBoatCommand != null)
+                {
+                    sailingMoveBoatCommand.UpdateDirection(Vector2.zero);
+                    sailingMoveBoatCommand.Execute();
+                }
+                
+                Debug.Log("InputManager: MoveBoat action canceled, stopping boat");
+            }
+        }
+        
+        private void OnActionStarted(InputAction.CallbackContext context)
+        {
+            Debug.Log($"InputManager: Action started: {context.action.name}");
+            // Handle action started if needed
         }
 
         private void OnDestroy()
         {
             if (currentActionMap != null)
             {
+                UnsubscribeFromActions();
                 currentActionMap.Disable();
             }
             commandMap.Clear();
