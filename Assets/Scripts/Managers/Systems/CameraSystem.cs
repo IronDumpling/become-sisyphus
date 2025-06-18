@@ -12,6 +12,11 @@ namespace BecomeSisyphus.Managers.Systems
         private CameraSystemBehaviour behaviour;
         private CinemachineCamera currentCamera;
         private Coroutine transitionCoroutine;
+        private Camera mainCamera;
+
+        // Layer constants
+        private const int OUTSIDE_LAYER = 6;
+        private const int INSIDE_LAYER = 7;
 
         public void Initialize()
         {
@@ -21,6 +26,21 @@ namespace BecomeSisyphus.Managers.Systems
             Debug.Log($"CameraSystem: Found CameraSystemBehaviour: {behaviour != null}");
             
             if (!ValidateSystemState()) return;
+
+            // Get the main camera reference
+            mainCamera = Camera.main;
+            if (mainCamera == null)
+            {
+                mainCamera = GameObject.FindAnyObjectByType<Camera>();
+            }
+            
+            if (mainCamera == null)
+            {
+                Debug.LogError("CameraSystem: Main camera not found!");
+                return;
+            }
+            
+            Debug.Log($"CameraSystem: Found main camera: {mainCamera.name}");
             
             // Use new state system to determine initial camera
             var stateManager = GameStateManager.Instance;
@@ -35,18 +55,21 @@ namespace BecomeSisyphus.Managers.Systems
                     Debug.Log("CameraSystem: Setting initial camera to OutsideWorldCamera");
                     currentCamera = behaviour.OutsideWorldCamera;
                     behaviour.OutsideWorldCamera.Priority.Value = behaviour.ActivePriority;
+                    SetCullingMaskForOutsideWorld();
                 }
                 else if (currentStatePath.Contains("InsideWorld"))
                 {
                     Debug.Log("CameraSystem: Setting initial camera to InsideWorldCamera");
                     currentCamera = behaviour.InsideWorldCamera;
                     behaviour.InsideWorldCamera.Priority.Value = behaviour.ActivePriority;
+                    SetCullingMaskForInsideWorld();
                 }
                 else
                 {
                     Debug.LogWarning($"CameraSystem: Unknown state path {currentStatePath}, defaulting to OutsideWorldCamera");
                     currentCamera = behaviour.OutsideWorldCamera;
                     behaviour.OutsideWorldCamera.Priority.Value = behaviour.ActivePriority;
+                    SetCullingMaskForOutsideWorld();
                 }
             }
             else
@@ -54,6 +77,7 @@ namespace BecomeSisyphus.Managers.Systems
                 Debug.LogWarning("CameraSystem: GameStateManager not available, defaulting to OutsideWorldCamera");
                 currentCamera = behaviour.OutsideWorldCamera;
                 behaviour.OutsideWorldCamera.Priority.Value = behaviour.ActivePriority;
+                SetCullingMaskForOutsideWorld();
             }
             
             Debug.Log($"CameraSystem: Final currentCamera state: {currentCamera != null}");
@@ -62,6 +86,38 @@ namespace BecomeSisyphus.Managers.Systems
                 Debug.Log($"CameraSystem: Current camera name: {currentCamera.name}");
             }
             Debug.Log("CameraSystem: Initialization completed");
+        }
+
+        /// <summary>
+        /// Set culling mask for outside world (exclude inside layer)
+        /// </summary>
+        private void SetCullingMaskForOutsideWorld()
+        {
+            if (mainCamera != null)
+            {
+                int mask = mainCamera.cullingMask;
+                mask &= ~(1 << INSIDE_LAYER); // Remove inside layer
+                mask |= (1 << OUTSIDE_LAYER); // Ensure outside layer is included
+                mainCamera.cullingMask = mask;
+                
+                Debug.Log($"CameraSystem: Main camera culling mask set for Outside World - excluding layer {INSIDE_LAYER} (Inside). Mask: {mask}");
+            }
+        }
+
+        /// <summary>
+        /// Set culling mask for inside world (exclude outside layer)
+        /// </summary>
+        private void SetCullingMaskForInsideWorld()
+        {
+            if (mainCamera != null)
+            {
+                int mask = mainCamera.cullingMask;
+                mask &= ~(1 << OUTSIDE_LAYER); // Remove outside layer
+                mask |= (1 << INSIDE_LAYER); // Ensure inside layer is included
+                mainCamera.cullingMask = mask;
+                
+                Debug.Log($"CameraSystem: Main camera culling mask set for Inside World - excluding layer {OUTSIDE_LAYER} (Outside). Mask: {mask}");
+            }
         }
 
         public void SwitchToOutsideWorld()
@@ -81,6 +137,9 @@ namespace BecomeSisyphus.Managers.Systems
             }
             
             Debug.Log("CameraSystem: Starting transition to OutsideWorldCamera");
+            
+            // Set culling mask for outside world
+            SetCullingMaskForOutsideWorld();
             
             if (transitionCoroutine != null)
             {
@@ -109,6 +168,9 @@ namespace BecomeSisyphus.Managers.Systems
             }
             
             Debug.Log("CameraSystem: Starting transition to InsideWorldCamera");
+
+            // Set culling mask for inside world
+            SetCullingMaskForInsideWorld();
 
             if (transitionCoroutine != null)
             {
