@@ -257,7 +257,6 @@ namespace BecomeSisyphus.Managers.Systems
                 {
                     point.isDiscovered = true;
                     OnInteractionPointDiscovered?.Invoke(point);
-                    Debug.Log($"[MindOceanSystem] 🔍 Discovered interaction point {point.id} ({point.type})");
                 }
 
                 // Set as nearby point
@@ -267,13 +266,11 @@ namespace BecomeSisyphus.Managers.Systems
                     if (nearbyInteractionPoint != null)
                     {
                         OnInteractionPointExited?.Invoke(nearbyInteractionPoint);
-                        Debug.Log($"[MindOceanSystem] ⬅️ Exited interaction range of {nearbyInteractionPoint.id} ({nearbyInteractionPoint.type})");
                     }
 
                     // Enter new interaction point
                     nearbyInteractionPoint = point;
                     OnInteractionPointEntered?.Invoke(nearbyInteractionPoint);
-                    Debug.Log($"[MindOceanSystem] ➡️ Entered interaction range of {nearbyInteractionPoint.id} ({nearbyInteractionPoint.type})");
                 }
             }
         }
@@ -286,7 +283,6 @@ namespace BecomeSisyphus.Managers.Systems
             if (point != null && nearbyInteractionPoint == point)
             {
                 OnInteractionPointExited?.Invoke(nearbyInteractionPoint);
-                Debug.Log($"[MindOceanSystem] ⬅️ Exited interaction range of {nearbyInteractionPoint.id} ({nearbyInteractionPoint.type})");
                 nearbyInteractionPoint = null;
             }
         }

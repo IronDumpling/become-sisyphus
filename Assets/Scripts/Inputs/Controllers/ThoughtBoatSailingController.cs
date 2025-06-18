@@ -18,6 +18,10 @@ namespace BecomeSisyphus.Inputs.Controllers
         [SerializeField] private float moveSpeed = 5f;
         [SerializeField] private float accelerationTime = 0.2f;
         [SerializeField] private float decelerationTime = 0.4f;
+        
+        [Header("Visual Settings")]
+        [SerializeField] private SpriteRenderer boatSpriteRenderer;
+        [SerializeField] private bool autoFindSpriteRenderer = true;
 
         // References
         private SisyphusMindSystem mindSystem;
@@ -31,6 +35,12 @@ namespace BecomeSisyphus.Inputs.Controllers
         private Vector2 targetVelocity;
         private Vector2 moveDirection;
         private bool isMoving;
+        
+        // State management
+        private bool wasInSailingState = false;
+        
+        // Visual state
+        private bool facingRight = true;
         
         // DOTween references
         private Tween movementTween;
@@ -60,6 +70,20 @@ namespace BecomeSisyphus.Inputs.Controllers
             moveDirection = Vector2.zero;
             isMoving = false;
             
+            // Auto-find sprite renderer if not assigned
+            if (autoFindSpriteRenderer && boatSpriteRenderer == null)
+            {
+                boatSpriteRenderer = GetComponentInChildren<SpriteRenderer>();
+                if (boatSpriteRenderer != null)
+                {
+                    Debug.Log("ThoughtBoatSailingController: Auto-found SpriteRenderer for boat flipping");
+                }
+                else
+                {
+                    Debug.LogWarning("ThoughtBoatSailingController: No SpriteRenderer found for boat flipping");
+                }
+            }
+            
             Debug.Log("ThoughtBoatSailingController: Initialized DOTween-based movement system");
         }
 
@@ -88,6 +112,17 @@ namespace BecomeSisyphus.Inputs.Controllers
                     mindOceanSystem.OnInteractionPointExited += OnInteractionPointExited;
                     mindOceanSystem.OnInteractionPointDiscovered += OnInteractionPointDiscovered;
                     Debug.Log("ThoughtBoatSailingController: Subscribed to MindOceanSystem events");
+                }
+                
+                // Subscribe to game state changes for auto-stop functionality
+                var stateManager = GameStateManager.Instance;
+                if (stateManager != null)
+                {
+                    stateManager.OnStateTransition += OnGameStateChanged;
+                    
+                    // Check initial state
+                    CheckAndUpdateSailingState();
+                    Debug.Log("ThoughtBoatSailingController: Subscribed to GameStateManager events");
                 }
             }
             else
@@ -142,6 +177,9 @@ namespace BecomeSisyphus.Inputs.Controllers
                 
                 // Update position in MindOceanSystem (simplified for trigger system)
                 UpdatePositionInMindOcean();
+                
+                // Update sprite flipping based on horizontal movement
+                UpdateSpriteFlipping();
             }
         }
 
@@ -154,9 +192,98 @@ namespace BecomeSisyphus.Inputs.Controllers
             }
         }
 
+        /// <summary>
+        /// Update sprite flipping based on horizontal movement direction
+        /// </summary>
+        private void UpdateSpriteFlipping()
+        {
+            if (boatSpriteRenderer == null || currentVelocity.magnitude < 0.1f) return;
+            
+            // Check horizontal movement direction
+            if (currentVelocity.x > 0.1f) // Moving right
+            {
+                if (!facingRight)
+                {
+                    FlipSprite(false); // Don't flip (face right)
+                    facingRight = true;
+                }
+            }
+            else if (currentVelocity.x < -0.1f) // Moving left
+            {
+                if (facingRight)
+                {
+                    FlipSprite(true); // Flip sprite (face left)
+                    facingRight = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Flip the boat sprite horizontally
+        /// </summary>
+        private void FlipSprite(bool flip)
+        {
+            if (boatSpriteRenderer != null)
+            {
+                boatSpriteRenderer.flipX = flip;
+            }
+        }
+
+        /// <summary>
+        /// Check if currently in a sailing state
+        /// </summary>
+        private bool IsInSailingState()
+        {
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                var currentState = stateManager.CurrentActiveState;
+                var statePath = currentState?.GetFullStatePath();
+                
+                return statePath != null && statePath.Contains("Sailing");
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Check and update sailing state, auto-stop if needed
+        /// </summary>
+        private void CheckAndUpdateSailingState()
+        {
+            bool currentlyInSailingState = IsInSailingState();
+            
+            // If we were in sailing state but now we're not, auto-stop the boat
+            if (wasInSailingState && !currentlyInSailingState)
+            {
+                Debug.Log("ThoughtBoatSailingController: Left sailing state - auto-stopping boat");
+                Stop();
+            }
+            
+            wasInSailingState = currentlyInSailingState;
+        }
+
+        /// <summary>
+        /// Handle game state changes
+        /// </summary>
+        private void OnGameStateChanged(IGameState previousState, IGameState newState)
+        {
+            CheckAndUpdateSailingState();
+        }
+
         // Called by input system
         public void Move(Vector2 direction)
         {
+            // Only allow movement if in sailing state
+            if (!IsInSailingState())
+            {
+                // If not in sailing state, stop movement
+                if (isMoving)
+                {
+                    Stop();
+                }
+                return;
+            }
+            
             Vector2 previousDirection = moveDirection;
             bool wasMoving = isMoving;
             
@@ -580,8 +707,6 @@ namespace BecomeSisyphus.Inputs.Controllers
         /// </summary>
         private void OnTriggerEnter(Collider other)
         {
-            Debug.Log($"[ThoughtBoatSailingController] 🔍 OnTriggerEnter called with object: {other.name} (Layer: {other.gameObject.layer})");
-            
             // Check if we hit an interaction point
             var interactionPointBehaviour = other.GetComponent<InteractionPointBehaviour>();
             if (interactionPointBehaviour != null)
@@ -589,7 +714,6 @@ namespace BecomeSisyphus.Inputs.Controllers
                 if (mindOceanSystem != null)
                 {
                     string interactionId = interactionPointBehaviour.GetInteractionId();
-                    Debug.Log($"[ThoughtBoatSailingController] 🔍 Looking for interaction point with ID: {interactionId}");
                     
                     // Get the interaction point data
                     var interactionPoint = mindOceanSystem.GetInteractionPoint(interactionId);
@@ -641,6 +765,13 @@ namespace BecomeSisyphus.Inputs.Controllers
                 mindOceanSystem.OnInteractionPointEntered -= OnInteractionPointEntered;
                 mindOceanSystem.OnInteractionPointExited -= OnInteractionPointExited;
                 mindOceanSystem.OnInteractionPointDiscovered -= OnInteractionPointDiscovered;
+            }
+            
+            // Unsubscribe from game state events
+            var stateManager = GameStateManager.Instance;
+            if (stateManager != null)
+            {
+                stateManager.OnStateTransition -= OnGameStateChanged;
             }
         }
     }
