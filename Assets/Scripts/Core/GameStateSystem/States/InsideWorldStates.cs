@@ -75,7 +75,6 @@ namespace BecomeSisyphus.Core.GameStateSystem
         {
             base.OnEnter(previousState);
             Debug.Log("SailingState: Sailing in the mind ocean");
-            Debug.Log("SailingState: Use WASD to move boat, Press Space to go to outside world");
             
             // 航行状态逻辑
             // - 启用自由航行 WASD移动小船
@@ -263,7 +262,6 @@ namespace BecomeSisyphus.Core.GameStateSystem
         {
             base.OnEnter(previousState);
             Debug.Log("HarbourInteractionState: Resting at harbour");
-            Debug.Log("HarbourInteractionState: Press Esc to start sailing, Press Space to go to outside world");
             
             // This acts as the "Resting" state
             // - Boat is docked at harbour

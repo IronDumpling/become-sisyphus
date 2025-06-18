@@ -23,9 +23,7 @@ namespace BecomeSisyphus.Inputs
         private MoveBoatCommand sailingMoveBoatCommand;
 
         // Controllers
-        private OutsideWorldController outsideWorldController;
         private ThoughtBoatSailingController thoughtBoatSailingController;
-        private ThoughtBoatInteractionController thoughtBoatInteractionController;
         private ThoughtVesselController thoughtVesselController;
         private TelescopeController telescopeController;
 
@@ -48,17 +46,13 @@ namespace BecomeSisyphus.Inputs
         {
             // Find controllers in current scene
             thoughtBoatSailingController = FindAnyObjectByType<ThoughtBoatSailingController>();
-            thoughtBoatInteractionController = FindAnyObjectByType<ThoughtBoatInteractionController>();
             thoughtVesselController = FindAnyObjectByType<ThoughtVesselController>();
             telescopeController = FindAnyObjectByType<TelescopeController>();
-            outsideWorldController = FindAnyObjectByType<OutsideWorldController>();
 
             Debug.Log($"InputManager: SetActiveControllers - Found controllers: " +
                      $"ThoughtBoatSailing={thoughtBoatSailingController != null}, " +
-                     $"ThoughtBoatInteraction={thoughtBoatInteractionController != null}, " +
                      $"ThoughtVessel={thoughtVesselController != null}, " +
-                     $"Telescope={telescopeController != null}, " +
-                     $"OutsideWorld={outsideWorldController != null}");
+                     $"Telescope={telescopeController != null}");
         }
 
         private void InitializeInputActions()
@@ -159,12 +153,6 @@ namespace BecomeSisyphus.Inputs
 
         private void RegisterOutsideWorldCommands()
         {
-            if (outsideWorldController == null) 
-            {
-                Debug.LogError("InputManager: outsideWorldController is null in RegisterOutsideWorldCommands!");
-                return;
-            }
-
             Debug.Log("InputManager: Registering OutsideWorld commands...");
 
             // State-specific commands based on current state
@@ -185,7 +173,7 @@ namespace BecomeSisyphus.Inputs
             Debug.Log("InputManager: Registering InsideWorld commands...");
 
             // State-specific commands
-            RegisterCommand("StartSailing", new StartSailingCommand());
+            RegisterCommand("StartSailing", new CloseInteractionCommand());
             RegisterCommand("EnterOutsideWorld", new EnterOutsideWorldFromInsideCommand());
             
             // Store move command for dynamic updates (using original MoveBoatCommand)
@@ -209,12 +197,14 @@ namespace BecomeSisyphus.Inputs
             sailingMoveBoatCommand = new MoveBoatCommand(thoughtBoatSailingController, Vector2.zero);
             RegisterCommand("MoveBoat", sailingMoveBoatCommand);
             RegisterCommand("EnterOutsideWorld", new EnterOutsideWorldFromInsideCommand());
+            
+            // Add StartSailing command for Esc key in sailing mode
+            RegisterCommand("StartSailing", new CloseInteractionCommand());
 
-            // Use unified OpenInteractionCommand with specific interaction types
-            RegisterCommand("OpenIslandInteraction", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Island, ""));
-            RegisterCommand("OpenSalvageInteraction", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Salvage, ""));
-            RegisterCommand("OpenLighthouseInteraction", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Lighthouse, ""));
-            RegisterCommand("OpenHarborInteraction", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Harbor, ""));
+            // Unified interaction command for nearby points
+            RegisterCommand("InteractWithNearbyPoint", new InteractWithNearbyPointCommand(thoughtBoatSailingController));
+            
+            // Keep vessel and navigation commands as they're not location-based
             RegisterCommand("OpenVesselUI", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Vessel));
             RegisterCommand("OpenNavigationMap", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.NavigationMap));
             RegisterCommand("OpenTelescope", new OpenInteractionCommand(thoughtBoatSailingController, ThoughtBoatSailingController.InteractionType.Telescope));
@@ -224,9 +214,13 @@ namespace BecomeSisyphus.Inputs
 
         private void RegisterBoatInteractionCommands()
         {
-            if (thoughtBoatInteractionController == null) return;
-
-            RegisterCommand("CloseInteraction", new CloseInteractionCommand(thoughtBoatInteractionController));
+            Debug.Log("InputManager: Registering BoatInteraction commands...");
+            
+            // Add StartSailing command for Esc key in interaction mode
+            RegisterCommand("StartSailing", new CloseInteractionCommand());
+            RegisterCommand("EnterOutsideWorld", new EnterOutsideWorldFromInsideCommand());
+            
+            Debug.Log("InputManager: Finished registering BoatInteraction commands");
         }
 
         private void RegisterThoughtVesselCommands()
@@ -327,7 +321,7 @@ namespace BecomeSisyphus.Inputs
         
         private void OnActionPerformed(InputAction.CallbackContext context)
         {
-            Debug.Log($"InputManager: Action performed: {context.action.name}");
+            Debug.Log($"InputManager: Action performed: {context.action.name} in ActionMap: {currentActionMap?.name}");
             
             // Handle Vector2 actions differently
             if (context.action.name == "MoveBoat")
@@ -352,6 +346,7 @@ namespace BecomeSisyphus.Inputs
             }
             else
             {
+                Debug.Log($"InputManager: Executing command for action: {context.action.name}");
                 ExecuteCommand(context.action.name);
             }
         }

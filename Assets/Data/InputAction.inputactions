@@ -169,21 +169,39 @@
         },
         {
             "name": "BoatSailing",
-            "id": "3ce2e5bd-0aab-4e73-9eaa-afc404d6c1de",
+            "id": "8e1c9dab-0bd6-431c-9e80-516596df8505",
             "actions": [
+                {
+                    "name": "InteractWithNearbyPoint",
+                    "type": "Button",
+                    "id": "56638c12-c7c4-4fae-be40-762cf1db40f4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "EnterOutsideWorld",
+                    "type": "Button",
+                    "id": "54207cf2-8102-4248-b488-28c668a8c4ed",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
                 {
                     "name": "MoveBoat",
                     "type": "Value",
-                    "id": "4d5e6f78-9012-3456-def7-890123456789",
+                    "id": "d38e9b8d-8e01-4db5-9cc0-2231b808b9a7",
                     "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
                 },
                 {
-                    "name": "EnterOutsideWorld",
+                    "name": "StartSailing",
                     "type": "Button",
-                    "id": "682c37bf-6735-485c-88c3-1dbc3a2a43dc",
+                    "id": "80d96477-b36b-4ac8-bc8c-89344d29a04c",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -192,8 +210,30 @@
             ],
             "bindings": [
                 {
+                    "name": "",
+                    "id": "d3aaa9bb-e0a6-4214-9b95-aeaa5c474cc4",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "InteractWithNearbyPoint",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e6702a0e-a913-419e-80b7-9373b704b8d4",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "EnterOutsideWorld",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
                     "name": "2D Vector",
-                    "id": "5e6f7890-1234-5678-ef90-123456789012",
+                    "id": "4532442f-0a40-4a2d-96de-faa9f51653c0",
                     "path": "2DVector",
                     "interactions": "",
                     "processors": "",
@@ -204,7 +244,7 @@
                 },
                 {
                     "name": "up",
-                    "id": "6f789012-3456-7890-f012-345678901234",
+                    "id": "bf82f406-06cd-498e-9b46-7daeefd509b6",
                     "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
@@ -215,7 +255,7 @@
                 },
                 {
                     "name": "down",
-                    "id": "78901234-5678-9012-0123-456789012345",
+                    "id": "2acd99f9-c7ff-4ccc-be19-c2b4f0d27485",
                     "path": "<Keyboard>/s",
                     "interactions": "",
                     "processors": "",
@@ -226,7 +266,7 @@
                 },
                 {
                     "name": "left",
-                    "id": "89012345-6789-0123-1234-567890123456",
+                    "id": "d351069b-661d-49b0-a7f0-9d6ec26c6c48",
                     "path": "<Keyboard>/a",
                     "interactions": "",
                     "processors": "",
@@ -237,7 +277,7 @@
                 },
                 {
                     "name": "right",
-                    "id": "90123456-7890-1234-2345-678901234567",
+                    "id": "4bdd27b8-d458-4632-a182-345eab206f23",
                     "path": "<Keyboard>/d",
                     "interactions": "",
                     "processors": "",
@@ -248,12 +288,12 @@
                 },
                 {
                     "name": "",
-                    "id": "84394469-ab68-4704-969e-fdafe8ca4be6",
-                    "path": "<Keyboard>/space",
+                    "id": "7215dc84-9e46-4237-9583-43c2a300c970",
+                    "path": "<Keyboard>/escape",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "EnterOutsideWorld",
+                    "action": "StartSailing",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

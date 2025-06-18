@@ -46,6 +46,9 @@ namespace BecomeSisyphus
             CreateSystemBehaviour<ExplorationSystemBehaviour>("ExplorationSystemBehaviour");
             CreateSystemBehaviour<SignifierSystemBehaviour>("SignifierSystemBehaviour");
             CreateSystemBehaviour<TimeSystemBehaviour>("TimeSystemBehaviour");
+            
+            // Create UI Manager
+            CreateUIManager();
         }
 
         private void CreateSystemBehaviour<T>(string name) where T : MonoBehaviour
@@ -53,6 +56,45 @@ namespace BecomeSisyphus
             var go = new GameObject(name);
             go.transform.parent = this.transform;
             go.AddComponent<T>();
+        }
+
+        private void CreateUIManager()
+        {
+            // Check if UIManager already exists in scene
+            if (BecomeSisyphus.UI.UIManager.Instance != null)
+            {
+                Debug.Log("GameManager: UIManager already exists in scene");
+                return;
+            }
+
+            // Create UIManager GameObject as a root object (no parent)
+            var uiManagerGO = new GameObject("UIManager");
+            
+            // Add Canvas
+            var canvas = uiManagerGO.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 100; // Ensure UI is on top
+            
+            // Add CanvasScaler
+            var canvasScaler = uiManagerGO.AddComponent<UnityEngine.UI.CanvasScaler>();
+            canvasScaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            canvasScaler.referenceResolution = new Vector2(1920, 1080);
+            canvasScaler.screenMatchMode = UnityEngine.UI.CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            canvasScaler.matchWidthOrHeight = 0.5f;
+            
+            // Add GraphicRaycaster
+            uiManagerGO.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+            
+            // Add UIManager component
+            uiManagerGO.AddComponent<BecomeSisyphus.UI.UIManager>();
+            
+            // Add UIManagerSetup for automatic configuration
+            uiManagerGO.AddComponent<BecomeSisyphus.UI.UIManagerSetup>();
+
+            // Since it's a root object, DontDestroyOnLoad will work correctly
+            DontDestroyOnLoad(uiManagerGO);
+            
+            Debug.Log("GameManager: UIManager created and configured as root GameObject");
         }
 
         private void InitializeSystems()

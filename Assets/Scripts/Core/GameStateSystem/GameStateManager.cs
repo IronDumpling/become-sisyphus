@@ -159,7 +159,8 @@ namespace BecomeSisyphus.Core.GameStateSystem
             currentRootState.OnEnter(previousState);
             OnStateEntered?.Invoke(currentRootState);
             
-            // 触发状态转换事件
+            // 更新最后活跃状态并触发状态转换事件
+            _lastActiveState = currentRootState.GetActiveLeafState();
             OnStateTransition?.Invoke(previousState, currentRootState);
             
             Debug.Log($"GameStateManager: Switched from {previousState?.StateName ?? "null"} to {stateName}");
@@ -217,10 +218,18 @@ namespace BecomeSisyphus.Core.GameStateSystem
         {
             Debug.Log($"GameStateManager: State changed to {newState.GetFullStatePath()}");
             
+            // 触发状态转换事件
+            var previousActiveState = _lastActiveState;
+            _lastActiveState = newState;
+            OnStateTransition?.Invoke(previousActiveState, newState);
+            
             // 这里可以添加全局状态变化处理逻辑
             // 比如通知InputManager、CameraSystem等
             NotifySystemsOfStateChange(newState);
         }
+
+        // 添加字段来跟踪上一个活跃状态
+        private IGameState _lastActiveState;
 
         /// <summary>
         /// 通知其他系统状态变化
@@ -236,7 +245,12 @@ namespace BecomeSisyphus.Core.GameStateSystem
                 var actionMapName = DetermineActionMapForState(newState);
                 if (!string.IsNullOrEmpty(actionMapName))
                 {
+                    Debug.Log($"[GameStateManager] Switching to ActionMap: {actionMapName} for state: {newState.GetFullStatePath()}");
                     BecomeSisyphus.Inputs.InputManager.Instance.SwitchActionMap(actionMapName);
+                }
+                else
+                {
+                    Debug.LogWarning($"[GameStateManager] No ActionMap determined for state: {newState.GetFullStatePath()}");
                 }
             }
 
@@ -317,13 +331,14 @@ namespace BecomeSisyphus.Core.GameStateSystem
         {
             var statePath = state.GetFullStatePath();
             
+            Debug.Log($"[GameStateManager] DetermineActionMapForState: statePath = {statePath}");
+            
+            // Check specific states first, then general ones
             if (statePath.Contains("MainMenu"))
                 return "MainTitle";
             else if (statePath.Contains("OutsideWorld"))
                 return "OutsideWorld";
-            else if (statePath.Contains("InsideWorld"))
-                return "InsideWorld";
-            else if (statePath.Contains("Sailing"))
+            else if (statePath.Contains("Sailing"))  // ✅ Check specific states first!
                 return "BoatSailing";
             else if (statePath.Contains("Interaction"))
                 return "BoatInteraction";
@@ -331,7 +346,10 @@ namespace BecomeSisyphus.Core.GameStateSystem
                 return "ThoughtVessel";
             else if (statePath.Contains("Telescope"))
                 return "Telescope";
+            else if (statePath.Contains("InsideWorld"))  // ✅ General InsideWorld check last
+                return "InsideWorld";
                 
+            Debug.LogWarning($"[GameStateManager] No ActionMap found for state: {statePath}");
             return null;
         }
 
